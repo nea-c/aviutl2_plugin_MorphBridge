@@ -10,9 +10,11 @@ struct SdfJumpPass {
   int step{};
   std::wstring source;
   std::wstring target;
+  friend bool operator==(const SdfJumpPass&, const SdfJumpPass&) = default;
 };
 
 struct SdfDispatchPlan {
+  std::wstring prefix;
   int width{};
   int height{};
   int groups_x{};
@@ -24,6 +26,7 @@ struct SdfDispatchPlan {
   std::wstring final_seed;
   std::wstring final_sdf;
   std::vector<SdfJumpPass> jumps;
+  friend bool operator==(const SdfDispatchPlan&, const SdfDispatchPlan&) = default;
 };
 
 [[nodiscard]] std::optional<SdfDispatchPlan> build_sdf_plan(

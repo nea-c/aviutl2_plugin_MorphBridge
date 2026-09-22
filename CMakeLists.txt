@@ -24,7 +24,8 @@ add_library(
   src/render/canvas.cpp
   src/render/sdf_encoding.cpp
   src/render/standard_transform.cpp
-  src/render/sdf_plan.cpp)
+  src/render/sdf_plan.cpp
+  src/render/gpu_renderer.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -72,7 +73,10 @@ add_custom_command(
   VERBATIM)
 add_custom_target(morph_bridge_shaders DEPENDS "${MORPH_BRIDGE_SHADER_HEADER}")
 add_dependencies(MorphBridge morph_bridge_shaders)
+add_dependencies(morph_bridge_core morph_bridge_shaders)
 target_include_directories(MorphBridge PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
+target_include_directories(morph_bridge_core PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
+target_link_libraries(morph_bridge_core PUBLIC aviutl2_sdk)
 
 if(BUILD_TESTING)
   add_executable(
@@ -85,7 +89,8 @@ if(BUILD_TESTING)
     tests/canvas_test.cpp
     tests/sdf_encoding_test.cpp
     tests/standard_transform_test.cpp
-    tests/sdf_plan_test.cpp)
+    tests/sdf_plan_test.cpp
+    tests/gpu_renderer_contract_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)

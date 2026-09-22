@@ -14,6 +14,7 @@ std::optional<SdfDispatchPlan> build_sdf_plan(
   }
 
   SdfDispatchPlan plan;
+  plan.prefix = resource_prefix;
   plan.width = width;
   plan.height = height;
   plan.groups_x = (width + 7) / 8;

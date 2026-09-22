@@ -9,6 +9,7 @@ void run_canvas_tests();
 void run_sdf_encoding_tests();
 void run_standard_transform_tests();
 void run_sdf_plan_tests();
+void run_gpu_renderer_contract_tests();
 
 int main() {
   try {
@@ -20,6 +21,7 @@ int main() {
     run_sdf_encoding_tests();
     run_standard_transform_tests();
     run_sdf_plan_tests();
+    run_gpu_renderer_contract_tests();
     return 0;
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
