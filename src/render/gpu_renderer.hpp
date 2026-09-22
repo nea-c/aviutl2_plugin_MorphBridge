@@ -13,6 +13,8 @@
 #include "render/sdf_plan.hpp"
 
 #include <array>
+#include <mutex>
+#include <optional>
 
 namespace morph_bridge {
 
@@ -44,6 +46,7 @@ struct GpuRenderRequest {
   CanvasLayout layout;
   std::uint64_t effect_id{};
   EndpointSignature signature;
+  std::uint64_t cache_generation{};
   float progress{};
   float alpha_threshold{0.5F};
   std::array<float, 4> color{1.0F, 1.0F, 1.0F, 1.0F};
@@ -53,7 +56,20 @@ struct GpuRenderRequest {
 
 class GpuRenderer {
  public:
-  [[nodiscard]] RenderResult render(const GpuRenderRequest& request) const;
+  [[nodiscard]] RenderResult render(const GpuRenderRequest& request);
+
+ private:
+  struct CacheIdentity {
+    std::uint64_t effect_id{};
+    EndpointSignature signature;
+    std::uint64_t cache_generation{};
+    int width{};
+    int height{};
+    friend bool operator==(const CacheIdentity&, const CacheIdentity&) = default;
+  };
+
+  std::mutex mutex_;
+  std::optional<CacheIdentity> expected_cache_;
 };
 
 }  // namespace morph_bridge

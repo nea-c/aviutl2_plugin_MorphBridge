@@ -23,6 +23,7 @@ struct Recorder {
   int width{};
   int height{};
   bool warm{};
+  int size_query_count{};
   int fail_upload_at{-1};
   int upload_count{};
 };
@@ -37,6 +38,7 @@ void set_image(const PIXEL_RGBA*, int width, int height) {
 
 bool resource_size(LPCWSTR resource, int* width, int* height) {
   active_recorder->calls.push_back(std::wstring{L"size:"} + resource);
+  ++active_recorder->size_query_count;
   if (!active_recorder->warm) return false;
   *width = active_recorder->width;
   *height = active_recorder->height;
@@ -47,7 +49,8 @@ bool upload(
     LPCWSTR resource, const void*, int, int, int, INPUT_PIXEL_FORMAT) {
   active_recorder->calls.push_back(std::wstring{L"upload:"} + resource);
   const int index = active_recorder->upload_count++;
-  return index != active_recorder->fail_upload_at;
+  return std::wstring{resource}.starts_with(L"resource:") &&
+         index != active_recorder->fail_upload_at;
 }
 
 bool compute(
@@ -91,6 +94,7 @@ GpuRenderRequest request(FILTER_PROC_VIDEO& video, const PreparedEndpoints& imag
   value.layout = layout();
   value.effect_id = 0x2a;
   value.signature = {1, 2};
+  value.cache_generation = 7;
   value.progress = 0.5F;
   value.alpha_threshold = 0.5F;
   value.color = {1.0F, 0.5F, 0.25F, 1.0F};
@@ -104,6 +108,8 @@ void run_gpu_renderer_contract_tests() {
   const auto same = build_gpu_resource_plan(0x2a, {1, 2});
   const auto changed = build_gpu_resource_plan(0x2a, {1, 3});
   MB_CHECK(first == same);
+  MB_CHECK(first.before.upload.starts_with(L"resource:"));
+  MB_CHECK(first.after.upload.starts_with(L"resource:"));
   MB_CHECK(first.before.upload != first.after.upload);
   MB_CHECK(first.before.final_sdf != first.after.final_sdf);
   MB_CHECK(first.before.final_sdf != changed.before.final_sdf);
@@ -113,11 +119,13 @@ void run_gpu_renderer_contract_tests() {
 
   auto images = endpoints();
   auto video = make_video();
+  GpuRenderer renderer;
   Recorder cold;
   active_recorder = &cold;
-  const auto cold_result = GpuRenderer{}.render(request(video, images));
+  const auto cold_result = renderer.render(request(video, images));
   MB_CHECK(cold_result.error == RenderError::None);
   MB_CHECK(cold_result.rebuilt);
+  MB_CHECK(cold.size_query_count == 0);
   MB_CHECK(cold.calls.front() == L"object");
   MB_CHECK(cold.calls[cold.calls.size() - 1] == L"pixel:object");
   MB_CHECK(cold.upload_count == 2);
@@ -125,12 +133,22 @@ void run_gpu_renderer_contract_tests() {
   Recorder warm;
   warm.warm = true;
   active_recorder = &warm;
-  const auto warm_result = GpuRenderer{}.render(request(video, images));
+  const auto warm_result = renderer.render(request(video, images));
   MB_CHECK(warm_result.error == RenderError::None);
   MB_CHECK(!warm_result.rebuilt);
   MB_CHECK(warm.upload_count == 0);
   MB_CHECK(warm.calls.front() == L"object");
   MB_CHECK(warm.calls.back() == L"pixel:object");
+
+  Recorder cleared;
+  active_recorder = &cleared;
+  auto after_clear = request(video, images);
+  after_clear.cache_generation = 8;
+  const auto cleared_result = renderer.render(after_clear);
+  MB_CHECK(cleared_result.error == RenderError::None);
+  MB_CHECK(cleared_result.rebuilt);
+  MB_CHECK(cleared.size_query_count == 0);
+  MB_CHECK(cleared.upload_count == 2);
 
   Recorder failed;
   failed.fail_upload_at = 0;

@@ -78,6 +78,7 @@ struct InstanceState {
   explicit InstanceState(const std::int64_t id) : effect_id(id) {}
   std::int64_t effect_id{};
   PreparationState preparation;
+  GpuRenderer renderer;
   std::atomic_uint64_t last_warning_generation{
       std::numeric_limits<std::uint64_t>::max()};
 };
@@ -287,6 +288,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   request.layout = *canvas;
   request.effect_id = static_cast<std::uint64_t>(state->effect_id);
   request.signature = signature;
+  request.cache_generation = clear_generation.load(std::memory_order_relaxed);
   request.progress = static_cast<float>(amount);
   request.alpha_threshold = static_cast<float>(threshold_value / 100.0);
   request.color = {
@@ -294,7 +296,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       color.value.g / 255.0F,
       color.value.b / 255.0F,
       1.0F};
-  const auto rendered = GpuRenderer{}.render(request);
+  const auto rendered = state->renderer.render(request);
   if (rendered.error != RenderError::None) {
     warn_once(state, L"GPU rendering failed");
     output_transparent(video);
