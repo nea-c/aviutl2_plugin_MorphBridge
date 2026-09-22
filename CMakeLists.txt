@@ -79,6 +79,30 @@ target_include_directories(MorphBridge PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_include_directories(morph_bridge_core PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_link_libraries(morph_bridge_core PUBLIC aviutl2_sdk)
 
+set(MORPH_BRIDGE_PACKAGE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/package")
+set(MORPH_BRIDGE_STAGED_DLL
+    "${MORPH_BRIDGE_PACKAGE_DIR}/Plugin/MorphBridge/MorphBridge.aux2")
+add_custom_command(
+  OUTPUT "${MORPH_BRIDGE_STAGED_DLL}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory
+          "${MORPH_BRIDGE_PACKAGE_DIR}/Plugin/MorphBridge"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+          "$<TARGET_FILE:MorphBridge>" "${MORPH_BRIDGE_STAGED_DLL}"
+  DEPENDS MorphBridge
+  VERBATIM)
+add_custom_target(stage_package ALL DEPENDS "${MORPH_BRIDGE_STAGED_DLL}")
+
+set(MORPH_BRIDGE_PACKAGE_ZIP
+    "${CMAKE_CURRENT_SOURCE_DIR}/MorphBridge-v${PROJECT_VERSION}.au2pkg.zip")
+add_custom_target(
+  package
+  COMMAND "${CMAKE_COMMAND}" -E rm -f "${MORPH_BRIDGE_PACKAGE_ZIP}"
+  COMMAND "${CMAKE_COMMAND}" -E tar cf "${MORPH_BRIDGE_PACKAGE_ZIP}"
+          --format=zip package.ini package.txt Plugin/MorphBridge/MorphBridge.aux2
+  WORKING_DIRECTORY "${MORPH_BRIDGE_PACKAGE_DIR}"
+  DEPENDS stage_package
+  VERBATIM)
+
 if(BUILD_TESTING)
   add_executable(
     morph_bridge_tests
@@ -99,4 +123,8 @@ if(BUILD_TESTING)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)
   set_target_properties(morph_bridge_tests PROPERTIES CXX_SCAN_FOR_MODULES OFF)
   add_test(NAME morph_bridge_tests COMMAND morph_bridge_tests)
+  add_test(
+    NAME package_layout
+    COMMAND "${CMAKE_COMMAND}" -DSTAGE=${MORPH_BRIDGE_PACKAGE_DIR}
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/VerifyPackage.cmake")
 endif()

@@ -21,7 +21,7 @@ extern "C" __declspec(dllexport) COMMON_PLUGIN_TABLE* GetCommonPluginTable() {
 extern "C" __declspec(dllexport) bool InitializePlugin(DWORD) { return true; }
 
 extern "C" __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
-  morph_bridge::register_morph_bridge(host);
+  (void)morph_bridge::register_morph_bridge(host);
 }
 
 extern "C" __declspec(dllexport) void UninitializePlugin() {}
