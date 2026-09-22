@@ -7,6 +7,8 @@ cbuffer MorphConstants : register(b0) {
   float MaximumDistance;
   float FeatherWidth;
   float OutputOpacity;
+  float ExtrapolationLimit;
+  float3 MorphPadding;
   float4 BeforeInverseRow0;
   float4 BeforeInverseRow1;
   float4 AfterInverseRow0;
@@ -34,7 +36,12 @@ float SampleDistance(Texture2D<float4> field, float2 sample_position, float4 row
 float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
   const float before = SampleDistance(BeforeSdf, position.xy, BeforeInverseRow0, BeforeInverseRow1);
   const float after = SampleDistance(AfterSdf, position.xy, AfterInverseRow0, AfterInverseRow1);
-  const float distance = lerp(before, after, Progress);
+  float distance = lerp(before, after, Progress);
+  if (Progress < 0.0) {
+    distance = max(distance, before - ExtrapolationLimit);
+  } else if (Progress > 1.0) {
+    distance = max(distance, after - ExtrapolationLimit);
+  }
   const float alpha = saturate(0.5 - distance / max(FeatherWidth, 0.0001)) * OutputOpacity;
   return float4(SolidColor.rgb * alpha, alpha);
 }

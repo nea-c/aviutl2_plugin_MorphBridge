@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.5 - 2026-09-22
+
+- Rebuild endpoint captures when the edit generation changes, including edits
+  that arrive while an asynchronous capture is still running.
+- Stop probing warm GPU cache sizes every frame, eliminating repeated invalid
+  image-resource warnings while retaining cache-clear recovery.
+- Add adaptive SDF padding and bound extrapolated contours to the destination
+  silhouette neighborhood to suppress canvas-edge fragments.
+
 ## 0.1.4 - 2026-09-22
 
 - Allow Progress easing to extrapolate beyond 0% and 100% in the SDF and

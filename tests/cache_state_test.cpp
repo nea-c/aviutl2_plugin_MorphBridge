@@ -29,16 +29,26 @@ void run_cache_state_tests() {
   const auto request_a = state.active_request();
   MB_CHECK(request_a != 0);
   MB_CHECK(state.observe(2, sig_a).action == CacheAction::WaitForCapture);
-  MB_CHECK(state.complete(request_a, sig_a, images_with_marker(std::byte{0x11})));
-  MB_CHECK(state.observe(3, sig_a).action == CacheAction::Keep);
+  MB_CHECK(!state.complete(request_a, sig_a, images_with_marker(std::byte{0x11})));
+  MB_CHECK(state.observe(2, sig_a).action == CacheAction::StartCapture);
+  const auto request_a_current = state.active_request();
+  MB_CHECK(request_a_current > request_a);
+  MB_CHECK(state.complete(
+      request_a_current, sig_a, images_with_marker(std::byte{0x12})));
+  MB_CHECK(state.observe(2, sig_a).action == CacheAction::Keep);
   MB_CHECK(state.ready() != nullptr);
+
+  MB_CHECK(state.observe(3, sig_a).action == CacheAction::StartCapture);
+  const auto request_a_next_generation = state.active_request();
+  MB_CHECK(state.complete(
+      request_a_next_generation, sig_a, images_with_marker(std::byte{0x13})));
 
   MB_CHECK(state.observe(4, sig_b).action == CacheAction::StartCapture);
   const auto request_b = state.active_request();
   MB_CHECK(request_b > request_a);
   MB_CHECK(!state.complete(request_a, sig_a, images_with_marker(std::byte{0x22})));
   MB_CHECK(state.complete(request_b, sig_b, images_with_marker(std::byte{0x33})));
-  MB_CHECK(state.observe(5, sig_b).action == CacheAction::Keep);
+  MB_CHECK(state.observe(4, sig_b).action == CacheAction::Keep);
 
   PreparationState coalesced;
   MB_CHECK(coalesced.observe(1, sig_a).action == CacheAction::StartCapture);

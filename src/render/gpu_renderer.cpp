@@ -75,6 +75,8 @@ struct alignas(16) MorphConstants {
   float maximum_distance;
   float feather_width;
   float opacity;
+  float extrapolation_limit;
+  std::array<float, 3> padding;
   std::array<float, 4> before_row0;
   std::array<float, 4> before_row1;
   std::array<float, 4> after_row0;
@@ -85,14 +87,6 @@ static_assert(sizeof(SeedConstants) % 16 == 0);
 static_assert(sizeof(JumpConstants) % 16 == 0);
 static_assert(sizeof(FinalizeConstants) % 16 == 0);
 static_assert(sizeof(MorphConstants) % 16 == 0);
-
-bool resource_ready(
-    FILTER_PROC_VIDEO& video, const std::wstring& name, const CanvasLayout& layout) {
-  int width = 0;
-  int height = 0;
-  return video.get_image_resource_size(name.c_str(), &width, &height) &&
-         width == layout.width && height == layout.height;
-}
 
 bool execute_compute(
     FILTER_PROC_VIDEO& video,
@@ -199,8 +193,8 @@ GpuResourcePlan build_gpu_resource_plan(
 RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   if (request.video == nullptr || request.endpoints == nullptr ||
       request.layout.width <= 0 || request.layout.height <= 0 ||
+      request.extrapolation_limit < 0.0F ||
       request.video->set_image_data == nullptr ||
-      request.video->get_image_resource_size == nullptr ||
       request.video->create_image_resource == nullptr ||
       request.video->set_image_resource_data == nullptr ||
       request.video->exec_computeshader_data == nullptr ||
@@ -225,10 +219,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   const CacheIdentity identity{
       request.effect_id, request.signature, request.cache_generation,
       request.layout.width, request.layout.height};
-  const bool cache_expected = expected_cache_ == identity;
-  const bool warm = cache_expected &&
-                    resource_ready(video, before_plan->final_sdf, request.layout) &&
-                    resource_ready(video, after_plan->final_sdf, request.layout);
+  const bool warm = expected_cache_ == identity;
   const auto fail = [this](const RenderError error, const bool rebuilt) {
     expected_cache_.reset();
     return RenderResult{error, rebuilt};
@@ -273,6 +264,8 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
       maximum_distance,
       1.0F,
       std::clamp(request.color[3], 0.0F, 1.0F),
+      request.extrapolation_limit,
+      {},
       before_row0,
       before_row1,
       after_row0,

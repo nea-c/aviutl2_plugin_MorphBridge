@@ -39,6 +39,8 @@ struct MorphConstantsProbe {
   float maximum_distance;
   float feather_width;
   float opacity;
+  float extrapolation_limit;
+  std::array<float, 3> padding;
   std::array<float, 4> before_row0;
   std::array<float, 4> before_row1;
   std::array<float, 4> after_row0;
@@ -120,6 +122,7 @@ GpuRenderRequest request(FILTER_PROC_VIDEO& video, const PreparedEndpoints& imag
   value.cache_generation = 7;
   value.progress = 1.25F;
   value.alpha_threshold = 0.5F;
+  value.extrapolation_limit = 32.0F;
   value.color = {1.0F, 0.5F, 0.25F, 1.0F};
   value.before_sampling = {5.0F, -10.0F, 0.0F, 2.0F, 0.5F, 100.0F, 50.0F};
   return value;
@@ -156,6 +159,7 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(cold.upload_count == 2);
   MB_CHECK(created_resources.size() == 8);
   MB_CHECK_NEAR(captured_constants.progress, 1.25F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.extrapolation_limit, 32.0F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[0], 0.5F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[1], 0.0F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[2], 47.5F, 0.0001F);
@@ -170,6 +174,7 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(warm_result.error == RenderError::None);
   MB_CHECK(!warm_result.rebuilt);
   MB_CHECK(warm.upload_count == 0);
+  MB_CHECK(warm.size_query_count == 0);
   MB_CHECK(warm.calls.front() == L"object");
   MB_CHECK(warm.calls.back() == L"pixel:object");
 

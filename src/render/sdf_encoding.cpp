@@ -65,6 +65,20 @@ float interpolate_sdf(const float before, const float after, const float progres
   return before + (after - before) * progress;
 }
 
+float stabilize_extrapolated_sdf(
+    const float before,
+    const float after,
+    const float progress,
+    const float distance_limit) {
+  float distance = interpolate_sdf(before, after, progress);
+  if (progress < 0.0F) {
+    distance = std::max(distance, before - distance_limit);
+  } else if (progress > 1.0F) {
+    distance = std::max(distance, after - distance_limit);
+  }
+  return distance;
+}
+
 bool inside(const float distance) {
   return distance <= 0.0F;
 }

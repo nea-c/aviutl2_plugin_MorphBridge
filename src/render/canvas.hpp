@@ -23,6 +23,18 @@ struct CanvasLayout {
   SamplingTransform after_sampling;
 };
 
+struct ExtrapolationEnvelope {
+  int margin{};
+  int distance_limit{};
+};
+
+[[nodiscard]] std::optional<ExtrapolationEnvelope> make_extrapolation_envelope(
+    int before_width,
+    int before_height,
+    int after_width,
+    int after_height,
+    int scale_percent);
+
 [[nodiscard]] std::optional<CanvasLayout> make_canvas_layout(
     int before_width,
     int before_height,

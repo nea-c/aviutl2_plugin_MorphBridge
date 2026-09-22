@@ -49,6 +49,7 @@ struct GpuRenderRequest {
   std::uint64_t cache_generation{};
   float progress{};
   float alpha_threshold{0.5F};
+  float extrapolation_limit{};
   std::array<float, 4> color{1.0F, 1.0F, 1.0F, 1.0F};
   SamplingTransform before_sampling;
   SamplingTransform after_sampling;

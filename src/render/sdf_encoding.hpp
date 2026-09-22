@@ -21,6 +21,8 @@ struct SeedCoordinate {
 [[nodiscard]] PackedRgba8 pack_signed_distance(float distance, float maximum_distance);
 [[nodiscard]] float unpack_signed_distance(PackedRgba8 packed, float maximum_distance);
 [[nodiscard]] float interpolate_sdf(float before, float after, float progress);
+[[nodiscard]] float stabilize_extrapolated_sdf(
+    float before, float after, float progress, float distance_limit);
 [[nodiscard]] bool inside(float distance);
 [[nodiscard]] float alpha_from_sdf(float distance, float feather_width);
 

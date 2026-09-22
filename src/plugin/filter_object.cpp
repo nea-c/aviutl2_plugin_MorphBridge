@@ -249,10 +249,14 @@ bool process_video(FILTER_PROC_VIDEO* video) {
     output_transparent(video);
     return true;
   }
-  const auto canvas = make_canvas_layout(
+  const auto envelope = make_extrapolation_envelope(
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
-      100, 4);
+      100);
+  const auto canvas = envelope ? make_canvas_layout(
+      prepared->before.width, prepared->before.height,
+      prepared->after.width, prepared->after.height,
+      100, envelope->margin) : std::nullopt;
   if (!canvas) {
     warn_once(state, L"the SDF canvas could not be created");
     output_transparent(video);
@@ -267,6 +271,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   request.cache_generation = clear_generation.load(std::memory_order_relaxed);
   request.progress = static_cast<float>(amount);
   request.alpha_threshold = static_cast<float>(threshold_value / 100.0);
+  request.extrapolation_limit = static_cast<float>(envelope->distance_limit);
   request.color = {
       color.value.r / 255.0F,
       color.value.g / 255.0F,

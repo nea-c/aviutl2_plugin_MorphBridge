@@ -40,9 +40,11 @@ class PreparationState {
 
  private:
   mutable std::mutex mutex_;
-  std::uint64_t observed_generation_{};
+  std::uint64_t desired_generation_{};
   std::uint64_t next_request_id_{};
   std::uint64_t active_request_id_{};
+  std::uint64_t active_generation_{};
+  std::uint64_t ready_generation_{};
   std::optional<EndpointSignature> active_signature_;
   std::optional<EndpointSignature> desired_signature_;
   std::optional<EndpointSignature> ready_signature_;

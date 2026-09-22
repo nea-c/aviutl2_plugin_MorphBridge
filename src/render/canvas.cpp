@@ -19,6 +19,27 @@ int make_even(const int value) {
 
 }  // namespace
 
+std::optional<ExtrapolationEnvelope> make_extrapolation_envelope(
+    const int before_width,
+    const int before_height,
+    const int after_width,
+    const int after_height,
+    const int scale_percent) {
+  if (before_width <= 0 || before_height <= 0 || after_width <= 0 ||
+      after_height <= 0 ||
+      (scale_percent != 25 && scale_percent != 50 && scale_percent != 100)) {
+    return std::nullopt;
+  }
+  const int maximum_content_dimension = std::max({
+      scaled_dimension(before_width, scale_percent),
+      scaled_dimension(before_height, scale_percent),
+      scaled_dimension(after_width, scale_percent),
+      scaled_dimension(after_height, scale_percent)});
+  const int distance_limit = std::clamp(
+      (maximum_content_dimension + 3) / 4, 16, 128);
+  return ExtrapolationEnvelope{distance_limit + 4, distance_limit};
+}
+
 std::optional<CanvasLayout> make_canvas_layout(
     const int before_width,
     const int before_height,
