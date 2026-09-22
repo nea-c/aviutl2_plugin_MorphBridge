@@ -8,6 +8,7 @@ void run_endpoint_capture_tests();
 void run_canvas_tests();
 void run_sdf_encoding_tests();
 void run_standard_transform_tests();
+void run_sdf_plan_tests();
 
 int main() {
   try {
@@ -18,6 +19,7 @@ int main() {
     run_canvas_tests();
     run_sdf_encoding_tests();
     run_standard_transform_tests();
+    run_sdf_plan_tests();
     return 0;
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';

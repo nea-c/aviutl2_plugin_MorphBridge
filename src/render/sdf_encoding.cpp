@@ -1,4 +1,5 @@
 #include "render/sdf_encoding.hpp"
+#include "render/sdf_constants_shared.h"
 
 #include <algorithm>
 #include <cmath>
@@ -6,8 +7,6 @@
 
 namespace morph_bridge {
 namespace {
-
-constexpr std::uint16_t invalid_coordinate = 0xffffU;
 
 std::uint16_t unpack_u16(const std::uint8_t low, const std::uint8_t high) {
   return static_cast<std::uint16_t>(
@@ -22,7 +21,7 @@ PackedRgba8 invalid_seed() {
 }
 
 PackedRgba8 pack_seed(const std::uint16_t x, const std::uint16_t y) {
-  if (x == invalid_coordinate || y == invalid_coordinate) {
+  if (x == sdf_invalid_coordinate || y == sdf_invalid_coordinate) {
     return invalid_seed();
   }
   return {
@@ -35,7 +34,7 @@ PackedRgba8 pack_seed(const std::uint16_t x, const std::uint16_t y) {
 std::optional<SeedCoordinate> unpack_seed(const PackedRgba8 packed) {
   const auto x = unpack_u16(packed[0], packed[1]);
   const auto y = unpack_u16(packed[2], packed[3]);
-  if (x == invalid_coordinate || y == invalid_coordinate) {
+  if (x == sdf_invalid_coordinate || y == sdf_invalid_coordinate) {
     return std::nullopt;
   }
   return SeedCoordinate{x, y};

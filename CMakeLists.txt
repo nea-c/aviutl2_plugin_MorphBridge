@@ -23,7 +23,8 @@ add_library(
   src/capture/endpoint_capture.cpp
   src/render/canvas.cpp
   src/render/sdf_encoding.cpp
-  src/render/standard_transform.cpp)
+  src/render/standard_transform.cpp
+  src/render/sdf_plan.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -36,6 +37,43 @@ target_link_libraries(MorphBridge PRIVATE aviutl2_sdk morph_bridge_core)
 set_target_properties(MorphBridge PROPERTIES PREFIX "" SUFFIX ".aux2")
 set_target_properties(MorphBridge PROPERTIES CXX_SCAN_FOR_MODULES OFF)
 
+find_program(FXC_EXECUTABLE NAMES fxc.exe fxc REQUIRED)
+set(MORPH_BRIDGE_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(MORPH_BRIDGE_SHADER_OUTPUTS)
+foreach(shader IN ITEMS seed jump_flood finalize morph)
+  if(shader STREQUAL "morph")
+    set(shader_profile ps_5_0)
+  else()
+    set(shader_profile cs_5_0)
+  endif()
+  set(shader_output "${MORPH_BRIDGE_GENERATED_DIR}/${shader}.cso")
+  add_custom_command(
+    OUTPUT "${shader_output}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${MORPH_BRIDGE_GENERATED_DIR}"
+    COMMAND "${FXC_EXECUTABLE}" /nologo /WX /T ${shader_profile} /E main
+            /I "${CMAKE_CURRENT_SOURCE_DIR}/src" /Fo "${shader_output}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${shader}.hlsl"
+    DEPENDS
+      "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${shader}.hlsl"
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/render/sdf_constants_shared.h"
+    VERBATIM)
+  list(APPEND MORPH_BRIDGE_SHADER_OUTPUTS "${shader_output}")
+endforeach()
+
+set(MORPH_BRIDGE_SHADER_HEADER "${MORPH_BRIDGE_GENERATED_DIR}/shaders.hpp")
+add_custom_command(
+  OUTPUT "${MORPH_BRIDGE_SHADER_HEADER}"
+  COMMAND "${CMAKE_COMMAND}"
+          "-DINPUTS=${MORPH_BRIDGE_GENERATED_DIR}/seed.cso|${MORPH_BRIDGE_GENERATED_DIR}/jump_flood.cso|${MORPH_BRIDGE_GENERATED_DIR}/finalize.cso|${MORPH_BRIDGE_GENERATED_DIR}/morph.cso"
+          "-DSYMBOLS=seed_cso|jump_flood_cso|finalize_cso|morph_cso"
+          "-DOUTPUT=${MORPH_BRIDGE_SHADER_HEADER}"
+          -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EmbedBinary.cmake"
+  DEPENDS ${MORPH_BRIDGE_SHADER_OUTPUTS}
+  VERBATIM)
+add_custom_target(morph_bridge_shaders DEPENDS "${MORPH_BRIDGE_SHADER_HEADER}")
+add_dependencies(MorphBridge morph_bridge_shaders)
+target_include_directories(MorphBridge PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
+
 if(BUILD_TESTING)
   add_executable(
     morph_bridge_tests
@@ -46,7 +84,8 @@ if(BUILD_TESTING)
     tests/endpoint_capture_test.cpp
     tests/canvas_test.cpp
     tests/sdf_encoding_test.cpp
-    tests/standard_transform_test.cpp)
+    tests/standard_transform_test.cpp
+    tests/sdf_plan_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)
