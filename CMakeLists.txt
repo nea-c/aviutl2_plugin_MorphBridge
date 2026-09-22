@@ -20,7 +20,10 @@ add_library(
   src/domain/neighbor_resolver.cpp
   src/cache/signature.cpp
   src/cache/cache_state.cpp
-  src/capture/endpoint_capture.cpp)
+  src/capture/endpoint_capture.cpp
+  src/render/canvas.cpp
+  src/render/sdf_encoding.cpp
+  src/render/standard_transform.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -40,7 +43,10 @@ if(BUILD_TESTING)
     tests/neighbor_resolver_test.cpp
     tests/signature_test.cpp
     tests/cache_state_test.cpp
-    tests/endpoint_capture_test.cpp)
+    tests/endpoint_capture_test.cpp
+    tests/canvas_test.cpp
+    tests/sdf_encoding_test.cpp
+    tests/standard_transform_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)
