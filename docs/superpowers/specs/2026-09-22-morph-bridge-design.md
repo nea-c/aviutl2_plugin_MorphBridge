@@ -9,11 +9,11 @@ The v1 deliverable is a single `MorphBridge.aux2`. It does not require `.obj2`, 
 ## User workflow
 
 1. Place visual object A, MorphBridge, and visual object B consecutively on the same layer.
-2. Set MorphBridge's progress track. Its default movement is linear from 0 to 100 across the object duration.
+2. Set MorphBridge's progress track from 0 to 100 using any AviUtl2 movement mode. A newly placed MorphBridge starts at the fixed value 0.
 3. MorphBridge finds A and B automatically and displays the interpolated silhouette.
 4. Editing either endpoint invalidates only the affected cached result after a lightweight signature check.
 
-If either neighbor is missing or cannot be rendered, MorphBridge outputs a transparent 1x1 image and exposes a concise status string in its settings.
+If either neighbor is missing or cannot be rendered, MorphBridge outputs a transparent 1x1 image and writes a rate-limited diagnostic log entry.
 
 ## Packaging and registration
 
@@ -66,7 +66,7 @@ Scene changes and explicit host cache clearing discard all instance caches.
 
 The endpoint alpha channel defines the silhouette. Pixels with alpha greater than or equal to the configurable threshold are inside.
 
-Each endpoint is centered in a shared object-local canvas large enough for both endpoint images plus a small distance-field margin. v1 uses identity sampling transforms, but endpoint metadata includes a 2D sampling transform so later versions can independently apply translation, rotation, and scale before SDF sampling without changing the cache format's public interface.
+Each endpoint is centered in a shared object-local canvas large enough for both endpoint images plus a small distance-field margin. Endpoint metadata retains independent sampling transforms so later image-alignment controls can be added without changing the cache format's public interface.
 
 SDF generation runs on the GPU through AviUtl2's compute-shader resource API:
 
@@ -77,18 +77,44 @@ SDF generation runs on the GPU through AviUtl2's compute-shader resource API:
 
 The interpolated field is `lerp(sdf_a, sdf_b, progress)`. The output alpha is derived from a one-pixel antialiased transition around distance zero and multiplied by the selected color's alpha. RGB is emitted premultiplied by alpha.
 
+## Standard transform interpolation
+
+MorphBridge reads the following `標準描画` tracks from A at A's final frame and B at B's first frame:
+
+- X, Y, and Z;
+- center X, Y, and Z;
+- X-, Y-, and Z-axis rotation;
+- scale and aspect ratio;
+- opacity.
+
+The A-side correction values are added to A's endpoint values, and the B-side correction values are added to B's endpoint values. MorphBridge then interpolates the corrected endpoint values using the same progress `p` used for the SDF morph.
+
+- Position and center are interpolated linearly.
+- Each rotation uses the shortest signed angular delta.
+- Scale is converted to a positive multiplicative factor and interpolated geometrically; invalid or zero values are clamped to a small positive factor.
+- Aspect ratio is converted to independent X/Y scale before interpolation.
+- Opacity is interpolated linearly and multiplies the output silhouette alpha.
+
+The interpolated result is written to `OBJECT_IMAGE_PARAM`, so AviUtl2 applies the complete output transform after the object-local SDF morph. Algebraically, A corrections have weight `1-p` and B corrections have weight `p`: at progress 0 only the corrected A transform is present, at 50 both endpoint corrections contribute equally, and at 100 only the corrected B transform is present.
+
 ## Controls
 
 v1 exposes:
 
-- `Progress`: track, 0 to 100, default linear movement 0 to 100.
+- `Progress`: track, 0 to 100, fixed default 0. Users select the desired AviUtl2 movement mode and endpoint value.
 - `Color`: solid silhouette color, default white.
 - `Alpha threshold`: numeric value from 0 to 100, default 50.
 - `SDF scale`: selection of 25%, 50%, or 100%, default 50%, controlling preparation cost and detail.
-- `Rebuild cache`: button that marks the focused MorphBridge instance stale.
-- `Status`: read-only text showing `Preparing`, `Ready`, or the current concise error.
+- `A position correction`: grouped X/Y/Z tracks, default 0.
+- `A center correction`: grouped X/Y/Z tracks, default 0.
+- `A rotation correction`: grouped X/Y/Z tracks, default 0 degrees.
+- `A scale/aspect correction`: grouped scale/aspect tracks, default 0 percentage points.
+- `B position correction`: grouped X/Y/Z tracks, default 0.
+- `B center correction`: grouped X/Y/Z tracks, default 0.
+- `B rotation correction`: grouped X/Y/Z tracks, default 0 degrees.
+- `B scale/aspect correction`: grouped scale/aspect tracks, default 0 percentage points.
 
-Independent endpoint offsets, rotations, and scales are explicitly deferred, but the renderer and cache metadata reserve separate A/B sampling transforms.
+Cache rebuilding is completely automatic. v1 exposes neither a manual rebuild button nor a status field.
 
 ## Threading and lifetime
 
@@ -100,7 +126,7 @@ Independent endpoint offsets, rotations, and scales are explicitly deferred, but
 
 ## Error handling
 
-Expected errors include missing neighbors, unsupported/nonvisual endpoints, rejected asynchronous requests, invalid callback geometry, shader/resource failure, and stale results. Errors do not crash or block AviUtl2. MorphBridge produces transparent output, updates its status, and emits rate-limited diagnostic logging.
+Expected errors include missing neighbors, unsupported/nonvisual endpoints, rejected asynchronous requests, invalid callback geometry, shader/resource failure, and stale results. Errors do not crash or block AviUtl2. MorphBridge produces transparent output and emits rate-limited diagnostic logging.
 
 ## Testing
 
@@ -111,6 +137,7 @@ Host-independent C++ tests cover:
 - global generation handling without unnecessary invalidation;
 - preparation coalescing and stale-result rejection;
 - shared-canvas placement and sampling-transform math;
+- standard-transform endpoint correction, shortest-angle interpolation, and geometric scale interpolation;
 - SDF interpolation sign behavior and alpha conversion using a CPU reference.
 
 SDK-boundary tests use small fake tables to verify registration, callback copying with non-tight pitch, event handling, and transparent fallback. Shader sources are compiled during the build, and a manual AviUtl2 checklist verifies shape/image/text endpoints, endpoint edits, scrubbing, undo/redo, project reload, and final output with prepared caches.
@@ -123,4 +150,4 @@ SDK-boundary tests use small fake tables to verify registration, callback copyin
 - Cross-layer endpoint selection.
 - Group-control additions that the object-render API does not include.
 - Starting asynchronous endpoint renders during final output.
-- Independent A/B transform controls in the user interface.
+- Perspective-aware independent A/B deformation inside the SDF canvas; v1 interpolates endpoint transforms on the completed morph image through `OBJECT_IMAGE_PARAM`.
