@@ -49,17 +49,17 @@ FILTER_ITEM_TRACK a_aspect{L"Aspect", 0.0, -99.0, 99.0, 0.1};
 FILTER_ITEM_GROUP a_corrections_end{L""};
 
 FILTER_ITEM_GROUP b_corrections{L"B Corrections"};
-FILTER_ITEM_TRACK b_x{L"Position X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_y{L"Position Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_z{L"Position Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cx{L"Center X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cy{L"Center Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cz{L"Center Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_rx{L"Rotation X", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_ry{L"Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_rz{L"Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_scale{L"Scale", 0.0, -99.0, 1000.0, 0.1};
-FILTER_ITEM_TRACK b_aspect{L"Aspect", 0.0, -99.0, 99.0, 0.1};
+FILTER_ITEM_TRACK b_x{L"B Position X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_y{L"B Position Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_z{L"B Position Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cx{L"B Center X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cy{L"B Center Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cz{L"B Center Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_rx{L"B Rotation X", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_ry{L"B Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_rz{L"B Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_scale{L"B Scale", 0.0, -99.0, 1000.0, 0.1};
+FILTER_ITEM_TRACK b_aspect{L"B Aspect", 0.0, -99.0, 99.0, 0.1};
 FILTER_ITEM_GROUP b_corrections_end{L""};
 
 void* filter_items[]{

@@ -146,6 +146,16 @@ bool build_endpoint_sdf(
                          &finalize, sizeof(finalize), plan);
 }
 
+void create_endpoint_resources(
+    FILTER_PROC_VIDEO& video, const SdfDispatchPlan& plan) {
+  const std::array<const std::wstring*, 4> resources{
+      &plan.seed, &plan.ping, &plan.pong, &plan.final_sdf};
+  for (const auto* resource : resources) {
+    video.create_image_resource(
+        resource->c_str(), nullptr, plan.width, plan.height);
+  }
+}
+
 std::pair<std::array<float, 4>, std::array<float, 4>> inverse_rows(
     const SamplingTransform& transform) {
   constexpr float pi = 3.14159265358979323846F;
@@ -181,6 +191,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
       request.layout.width <= 0 || request.layout.height <= 0 ||
       request.video->set_image_data == nullptr ||
       request.video->get_image_resource_size == nullptr ||
+      request.video->create_image_resource == nullptr ||
       request.video->set_image_resource_data == nullptr ||
       request.video->exec_computeshader_data == nullptr ||
       request.video->exec_pixelshader_data == nullptr) {
@@ -235,6 +246,8 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
             INPUT_PIXEL_FORMAT::RGBA)) {
       return fail(RenderError::UploadFailed, false);
     }
+    create_endpoint_resources(video, *before_plan);
+    create_endpoint_resources(video, *after_plan);
     const float threshold = std::clamp(request.alpha_threshold, 0.0F, 1.0F);
     if (!build_endpoint_sdf(video, *before_plan, threshold, maximum_distance) ||
         !build_endpoint_sdf(video, *after_plan, threshold, maximum_distance)) {

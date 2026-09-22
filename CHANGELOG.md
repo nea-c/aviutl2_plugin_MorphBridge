@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 - 2026-09-22
+
+- Create all persistent SDF image resources before using them as compute-shader
+  targets, preventing `invalid target resource` failures.
+- Give B correction controls unique persisted names so A/B values no longer
+  produce duplicate project keys.
+
 ## 0.1.2 - 2026-09-22
 
 - Upload endpoint images through SDK-supported transient `resource:` names so

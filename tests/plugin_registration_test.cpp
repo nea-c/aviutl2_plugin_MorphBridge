@@ -2,6 +2,7 @@
 #include "test_support.hpp"
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -66,12 +67,15 @@ void run_plugin_registration_tests() {
   int item_count = 0;
   bool has_a_corrections = false;
   bool has_b_corrections = false;
+  std::set<std::wstring> value_item_names;
   for (void** item = registered_filter->items; *item != nullptr; ++item) {
     const auto* prefix = static_cast<const FilterItemPrefix*>(*item);
     MB_CHECK(std::wstring{prefix->type} != L"trackgroup");
     if (std::wstring{prefix->type} == L"group") {
       has_a_corrections |= std::wstring{prefix->name} == L"A Corrections";
       has_b_corrections |= std::wstring{prefix->name} == L"B Corrections";
+    } else {
+      MB_CHECK(value_item_names.insert(prefix->name).second);
     }
     ++item_count;
   }

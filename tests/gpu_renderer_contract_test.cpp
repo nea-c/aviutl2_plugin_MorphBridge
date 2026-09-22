@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -29,6 +30,7 @@ struct Recorder {
 };
 
 Recorder* active_recorder{};
+std::set<std::wstring> created_resources;
 
 void set_image(const PIXEL_RGBA*, int width, int height) {
   active_recorder->calls.push_back(L"object");
@@ -53,11 +55,16 @@ bool upload(
          index != active_recorder->fail_upload_at;
 }
 
+void create_resource(LPCWSTR resource, const PIXEL_RGBA*, int, int) {
+  active_recorder->calls.push_back(std::wstring{L"create:"} + resource);
+  created_resources.insert(resource);
+}
+
 bool compute(
     const BYTE*, int, LPCWSTR* targets, int, LPCWSTR*, int, void*, int,
     int, int, int, ID3D11SamplerState*) {
   active_recorder->calls.push_back(std::wstring{L"compute:"} + targets[0]);
-  return true;
+  return created_resources.contains(targets[0]);
 }
 
 bool pixel(
@@ -71,6 +78,7 @@ FILTER_PROC_VIDEO make_video() {
   FILTER_PROC_VIDEO video{};
   video.set_image_data = &set_image;
   video.get_image_resource_size = &resource_size;
+  video.create_image_resource = &create_resource;
   video.set_image_resource_data = &upload;
   video.exec_computeshader_data = &compute;
   video.exec_pixelshader_data = &pixel;
@@ -104,6 +112,7 @@ GpuRenderRequest request(FILTER_PROC_VIDEO& video, const PreparedEndpoints& imag
 }  // namespace
 
 void run_gpu_renderer_contract_tests() {
+  created_resources.clear();
   const auto first = build_gpu_resource_plan(0x2a, {1, 2});
   const auto same = build_gpu_resource_plan(0x2a, {1, 2});
   const auto changed = build_gpu_resource_plan(0x2a, {1, 3});
@@ -129,6 +138,7 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(cold.calls.front() == L"object");
   MB_CHECK(cold.calls[cold.calls.size() - 1] == L"pixel:object");
   MB_CHECK(cold.upload_count == 2);
+  MB_CHECK(created_resources.size() == 8);
 
   Recorder warm;
   warm.warm = true;
