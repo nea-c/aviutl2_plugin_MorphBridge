@@ -1,3 +1,5 @@
+#include "render/sdf_constants_shared.h"
+
 Texture2D<float4> BeforeSdf : register(t0);
 Texture2D<float4> AfterSdf : register(t1);
 
@@ -28,9 +30,11 @@ float SampleDistance(Texture2D<float4> field, float2 sample_position, float4 row
   uint width;
   uint height;
   field.GetDimensions(width, height);
-  if (transformed.x < 0.0 || transformed.y < 0.0 ||
-      transformed.x >= float(width) || transformed.y >= float(height)) return MaximumDistance;
-  return DecodeDistance(field.Load(int3(int2(transformed), 0)));
+  const float2 clamped = clamp(
+      transformed, float2(0.0, 0.0), float2(width - 1u, height - 1u));
+  const float border_distance = DecodeDistance(field.Load(int3(int2(clamped), 0)));
+  const float2 outside_offset = transformed - clamped;
+  return ExtendSdfDistance(border_distance, outside_offset.x, outside_offset.y);
 }
 
 float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0) : SV_Target {

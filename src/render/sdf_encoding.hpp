@@ -1,5 +1,7 @@
 #pragma once
 
+#include "render/sdf_constants_shared.h"
+
 #include <array>
 #include <cstdint>
 #include <optional>

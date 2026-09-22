@@ -7,6 +7,7 @@
 
 using morph_bridge::SeedCoordinate;
 using morph_bridge::alpha_from_sdf;
+using morph_bridge::extend_sdf_distance;
 using morph_bridge::inside;
 using morph_bridge::interpolate_sdf;
 using morph_bridge::stabilize_extrapolated_sdf;
@@ -47,4 +48,6 @@ void run_sdf_encoding_tests() {
       stabilize_extrapolated_sdf(-10.0F, 10.0F, 0.5F, 32.0F),
       0.0F, 0.0001F);
   MB_CHECK(alpha_from_sdf(0.0F, 1.0F) > 0.49F);
+  MB_CHECK_NEAR(extend_sdf_distance(12.0F, 0.0F, 0.0F), 12.0F, 0.0001F);
+  MB_CHECK_NEAR(extend_sdf_distance(12.0F, 3.0F, 4.0F), 17.0F, 0.0001F);
 }

@@ -44,7 +44,9 @@ retained, while transient GPU SDF resources are reconstructed before each draw
 because AviUtl2 does not preserve those image resources between render calls.
 
 The SDF canvas expands automatically to contain the currently weighted A/B
-corrections, including translation, scale, rotation, and aspect changes.
+corrections, including translation, scale, rotation, and aspect changes. When
+inverse correction sampling reaches beyond an endpoint SDF texture, its outside
+distance is extended continuously from the nearest texture edge.
 
 Extrapolated progress uses an adaptive transparent SDF margin. Beyond 0% or
 100%, the contour remains limited to a size-dependent neighborhood around the

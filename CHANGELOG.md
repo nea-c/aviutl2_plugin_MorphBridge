@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-09-22
+
+- Extend signed distance continuously beyond each SDF texture boundary instead
+  of substituting the maximum distance, removing straight-edged holes caused by
+  corrected sampling coordinates leaving an endpoint texture.
+
 ## 0.1.6 - 2026-09-22
 
 - Rebuild transient GPU SDF resources before every draw so AviUtl2 never
