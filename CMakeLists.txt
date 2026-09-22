@@ -17,7 +17,9 @@ add_library(
   morph_bridge_core
   STATIC
   src/domain/types.cpp
-  src/domain/neighbor_resolver.cpp)
+  src/domain/neighbor_resolver.cpp
+  src/cache/signature.cpp
+  src/cache/cache_state.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -34,7 +36,9 @@ if(BUILD_TESTING)
   add_executable(
     morph_bridge_tests
     tests/test_main.cpp
-    tests/neighbor_resolver_test.cpp)
+    tests/neighbor_resolver_test.cpp
+    tests/signature_test.cpp
+    tests/cache_state_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)
