@@ -13,7 +13,11 @@ target_include_directories(
 target_compile_definitions(aviutl2_sdk INTERFACE NOMINMAX WIN32_LEAN_AND_MEAN)
 target_compile_options(aviutl2_sdk INTERFACE /wd4828)
 
-add_library(morph_bridge_core STATIC src/domain/types.cpp)
+add_library(
+  morph_bridge_core
+  STATIC
+  src/domain/types.cpp
+  src/domain/neighbor_resolver.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -27,7 +31,10 @@ set_target_properties(MorphBridge PROPERTIES PREFIX "" SUFFIX ".aux2")
 set_target_properties(MorphBridge PROPERTIES CXX_SCAN_FOR_MODULES OFF)
 
 if(BUILD_TESTING)
-  add_executable(morph_bridge_tests tests/test_main.cpp)
+  add_executable(
+    morph_bridge_tests
+    tests/test_main.cpp
+    tests/neighbor_resolver_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)
