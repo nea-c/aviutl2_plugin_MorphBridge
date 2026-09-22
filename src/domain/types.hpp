@@ -34,6 +34,8 @@ struct SamplingTransform {
   float rotation{};
   float sx{1.0F};
   float sy{1.0F};
+  float cx{};
+  float cy{};
   friend bool operator==(const SamplingTransform&, const SamplingTransform&) = default;
 };
 

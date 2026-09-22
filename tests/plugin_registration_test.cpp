@@ -62,7 +62,7 @@ void run_plugin_registration_tests() {
   MB_CHECK(morph_bridge::required_version() == 2'010'800);
   MB_CHECK(registered_filter->items != nullptr);
   auto* progress = static_cast<FILTER_ITEM_TRACK*>(registered_filter->items[0]);
-  MB_CHECK(std::wstring{progress->name} == L"Progress");
+  MB_CHECK(std::wstring{progress->name} == L"進捗");
   MB_CHECK(progress->value == 0.0);
   int item_count = 0;
   bool has_a_corrections = false;
@@ -72,8 +72,8 @@ void run_plugin_registration_tests() {
     const auto* prefix = static_cast<const FilterItemPrefix*>(*item);
     MB_CHECK(std::wstring{prefix->type} != L"trackgroup");
     if (std::wstring{prefix->type} == L"group") {
-      has_a_corrections |= std::wstring{prefix->name} == L"A Corrections";
-      has_b_corrections |= std::wstring{prefix->name} == L"B Corrections";
+      has_a_corrections |= std::wstring{prefix->name} == L"A補正";
+      has_b_corrections |= std::wstring{prefix->name} == L"B補正";
     } else {
       MB_CHECK(value_item_names.insert(prefix->name).second);
     }
@@ -81,7 +81,20 @@ void run_plugin_registration_tests() {
   }
   MB_CHECK(has_a_corrections);
   MB_CHECK(has_b_corrections);
-  MB_CHECK(item_count == 30);
+  MB_CHECK(value_item_names.contains(L"色"));
+  MB_CHECK(value_item_names.contains(L"アルファしきい値"));
+  MB_CHECK(value_item_names.contains(L"A補正::X"));
+  MB_CHECK(value_item_names.contains(L"A補正::Y"));
+  MB_CHECK(value_item_names.contains(L"A補正::拡大率"));
+  MB_CHECK(value_item_names.contains(L"A補正::回転"));
+  MB_CHECK(value_item_names.contains(L"A補正::縦横比"));
+  MB_CHECK(value_item_names.contains(L"B補正::X"));
+  MB_CHECK(value_item_names.contains(L"B補正::Y"));
+  MB_CHECK(value_item_names.contains(L"B補正::拡大率"));
+  MB_CHECK(value_item_names.contains(L"B補正::回転"));
+  MB_CHECK(value_item_names.contains(L"B補正::縦横比"));
+  MB_CHECK(!value_item_names.contains(L"SDF scale"));
+  MB_CHECK(item_count == 17);
   MB_CHECK(registered_filter->func_create != nullptr);
   MB_CHECK(registered_filter->func_destroy != nullptr);
 }

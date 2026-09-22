@@ -13,18 +13,21 @@ A object -> MorphBridge -> B object
 ```
 
 MorphBridge captures the final frame of A and the first frame of B with their
-effects applied. `Progress` is an ordinary AviUtl2 track: leave its first value
+effects applied. `進捗` is an ordinary AviUtl2 track: leave its first value
 at 0, set the second value to 100, and select linear or another standard movement
-mode. There is intentionally no automatic-progress switch.
+mode. Easing overshoot is extrapolated instead of clamped. There is intentionally
+no automatic-progress switch.
 
 ## Controls
 
-- `Progress`: 0–100 silhouette interpolation.
-- `Color`: solid output color.
-- `Alpha threshold`: converts the captured alpha into a silhouette.
-- `SDF scale`: 25%, 50%, or 100% working resolution.
-- `A/B Corrections`: grouped Position, Center, Rotation, Scale, and Aspect
-  tracks. A correction fades out toward B; B correction fades in from A.
+- `進捗`: silhouette interpolation, including values outside 0–100.
+- `色`: solid output color.
+- `アルファしきい値`: converts the captured alpha into a silhouette.
+- `A補正` / `B補正`: image-centered X, Y, scale, rotation, and aspect tracks.
+  A is weighted by Progress; B is weighted by one minus Progress. These tracks
+  affect SDF sampling only and extrapolate with Progress.
+
+The SDF is always generated at 100% working resolution.
 
 The endpoint position, center, rotation, scale/aspect, and opacity are read at
 the endpoint frames and interpolated automatically. Rotation uses the shortest
@@ -34,7 +37,7 @@ path and positive scale uses geometric interpolation.
 
 `UPDATE_OBJECT` marks the project generation as changed. On the next render,
 MorphBridge compares the complete A/B aliases, endpoint frames, scene size,
-alpha threshold, SDF scale, and cache format. It captures again only when that
+alpha threshold, fixed SDF resolution, and cache format. It captures again only when that
 signature changed. Rapid edits are coalesced and stale asynchronous results are
 discarded. AviUtl2 cache clearing keeps the owned CPU endpoints and reconstructs
 missing GPU resources automatically.

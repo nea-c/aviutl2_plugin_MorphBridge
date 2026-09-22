@@ -62,8 +62,7 @@ float unpack_signed_distance(const PackedRgba8 packed, const float maximum_dista
 }
 
 float interpolate_sdf(const float before, const float after, const float progress) {
-  const float amount = std::clamp(progress, 0.0F, 1.0F);
-  return before + (after - before) * amount;
+  return before + (after - before) * progress;
 }
 
 bool inside(const float distance) {

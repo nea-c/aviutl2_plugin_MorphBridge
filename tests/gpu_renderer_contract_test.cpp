@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <array>
 #include <set>
 #include <string>
 #include <utility>
@@ -31,6 +32,19 @@ struct Recorder {
 
 Recorder* active_recorder{};
 std::set<std::wstring> created_resources;
+
+struct MorphConstantsProbe {
+  std::array<float, 4> color;
+  float progress;
+  float maximum_distance;
+  float feather_width;
+  float opacity;
+  std::array<float, 4> before_row0;
+  std::array<float, 4> before_row1;
+  std::array<float, 4> after_row0;
+  std::array<float, 4> after_row1;
+};
+MorphConstantsProbe captured_constants{};
 
 void set_image(const PIXEL_RGBA*, int width, int height) {
   active_recorder->calls.push_back(L"object");
@@ -68,9 +82,10 @@ bool compute(
 }
 
 bool pixel(
-    const BYTE*, int, LPCWSTR target, LPCWSTR*, int, void*, int,
+    const BYTE*, int, LPCWSTR target, LPCWSTR*, int, void* constants, int,
     ID3D11BlendState*, ID3D11SamplerState*) {
   active_recorder->calls.push_back(std::wstring{L"pixel:"} + target);
+  captured_constants = *static_cast<const MorphConstantsProbe*>(constants);
   return true;
 }
 
@@ -103,9 +118,10 @@ GpuRenderRequest request(FILTER_PROC_VIDEO& video, const PreparedEndpoints& imag
   value.effect_id = 0x2a;
   value.signature = {1, 2};
   value.cache_generation = 7;
-  value.progress = 0.5F;
+  value.progress = 1.25F;
   value.alpha_threshold = 0.5F;
   value.color = {1.0F, 0.5F, 0.25F, 1.0F};
+  value.before_sampling = {5.0F, -10.0F, 0.0F, 2.0F, 0.5F, 100.0F, 50.0F};
   return value;
 }
 
@@ -139,6 +155,13 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(cold.calls[cold.calls.size() - 1] == L"pixel:object");
   MB_CHECK(cold.upload_count == 2);
   MB_CHECK(created_resources.size() == 8);
+  MB_CHECK_NEAR(captured_constants.progress, 1.25F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row0[0], 0.5F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row0[1], 0.0F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row0[2], 47.5F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row1[0], 0.0F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row1[1], 2.0F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.before_row1[2], -30.0F, 0.0001F);
 
   Recorder warm;
   warm.warm = true;

@@ -162,14 +162,24 @@ std::pair<std::array<float, 4>, std::array<float, 4>> inverse_rows(
   const float radians = transform.rotation * pi / 180.0F;
   const float cosine = std::cos(radians);
   const float sine = std::sin(radians);
-  const float sx = std::max(std::abs(transform.sx), 1.0e-6F);
-  const float sy = std::max(std::abs(transform.sy), 1.0e-6F);
+  const auto safe_factor = [](const float value) {
+    if (std::abs(value) >= 1.0e-6F) return value;
+    return std::copysign(1.0e-6F, value == 0.0F ? 1.0F : value);
+  };
+  const float sx = safe_factor(transform.sx);
+  const float sy = safe_factor(transform.sy);
+  const float translated_center_x = transform.cx + transform.tx;
+  const float translated_center_y = transform.cy + transform.ty;
   const std::array<float, 4> row0{
       cosine / sx, sine / sx,
-      -(cosine * transform.tx + sine * transform.ty) / sx, 0.0F};
+      transform.cx -
+          (cosine * translated_center_x + sine * translated_center_y) / sx,
+      0.0F};
   const std::array<float, 4> row1{
       -sine / sy, cosine / sy,
-      -(-sine * transform.tx + cosine * transform.ty) / sy, 0.0F};
+      transform.cy -
+          (-sine * translated_center_x + cosine * translated_center_y) / sy,
+      0.0F};
   return {row0, row1};
 }
 
@@ -259,7 +269,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   const auto [after_row0, after_row1] = inverse_rows(request.after_sampling);
   MorphConstants constants{
       request.color,
-      std::clamp(request.progress, 0.0F, 1.0F),
+      request.progress,
       maximum_distance,
       1.0F,
       std::clamp(request.color[3], 0.0F, 1.0F),

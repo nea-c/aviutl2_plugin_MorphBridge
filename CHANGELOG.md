@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.4 - 2026-09-22
+
+- Allow Progress easing to extrapolate beyond 0% and 100% in the SDF and
+  standard transform interpolation paths.
+- Apply A/B correction tracks only to SDF sampling, weighted by Progress and
+  one minus Progress respectively, including extrapolation.
+- Use image-centered X, Y, scale, rotation, and aspect correction controls with
+  Japanese labels and unique namespaced project keys.
+- Remove the SDF Scale control and always build the SDF at 100% resolution.
+
 ## 0.1.3 - 2026-09-22
 
 - Create all persistent SDF image resources before using them as compute-shader

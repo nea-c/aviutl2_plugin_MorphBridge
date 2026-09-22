@@ -34,7 +34,7 @@ float SampleDistance(Texture2D<float4> field, float2 sample_position, float4 row
 float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
   const float before = SampleDistance(BeforeSdf, position.xy, BeforeInverseRow0, BeforeInverseRow1);
   const float after = SampleDistance(AfterSdf, position.xy, AfterInverseRow0, AfterInverseRow1);
-  const float distance = lerp(before, after, saturate(Progress));
+  const float distance = lerp(before, after, Progress);
   const float alpha = saturate(0.5 - distance / max(FeatherWidth, 0.0001)) * OutputOpacity;
   return float4(SolidColor.rgb * alpha, alpha);
 }

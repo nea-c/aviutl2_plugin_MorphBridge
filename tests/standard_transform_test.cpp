@@ -4,8 +4,10 @@
 using morph_bridge::StandardTransform;
 using morph_bridge::TransformCorrection;
 using morph_bridge::interpolate_angle_degrees;
-using morph_bridge::interpolate_corrected_transform;
 using morph_bridge::interpolate_positive_scale;
+using morph_bridge::interpolate_transform;
+using morph_bridge::make_sampling_transform;
+using morph_bridge::make_sampling_transforms;
 
 void run_standard_transform_tests() {
   StandardTransform a{};
@@ -19,30 +21,55 @@ void run_standard_transform_tests() {
   b.scale = 200.0;
   b.opacity = 80.0;
 
-  TransformCorrection a_fix{};
-  a_fix.x = 20.0;
-  a_fix.scale = 10.0;
-  TransformCorrection b_fix{};
-  b_fix.x = -10.0;
-  b_fix.scale = -20.0;
-
-  const auto at_a = interpolate_corrected_transform(a, a_fix, b, b_fix, 0.0);
-  MB_CHECK_NEAR(at_a.x, a.x + a_fix.x, 0.0001);
-  MB_CHECK_NEAR(at_a.scale, a.scale + a_fix.scale, 0.0001);
-  const auto at_b = interpolate_corrected_transform(a, a_fix, b, b_fix, 1.0);
-  MB_CHECK_NEAR(at_b.x, b.x + b_fix.x, 0.0001);
-  MB_CHECK_NEAR(at_b.scale, b.scale + b_fix.scale, 0.0001);
+  const auto at_a = interpolate_transform(a, b, 0.0);
+  MB_CHECK_NEAR(at_a.x, a.x, 0.0001);
+  MB_CHECK_NEAR(at_a.scale, a.scale, 0.0001);
+  const auto at_b = interpolate_transform(a, b, 1.0);
+  MB_CHECK_NEAR(at_b.x, b.x, 0.0001);
+  MB_CHECK_NEAR(at_b.scale, b.scale, 0.0001);
 
   MB_CHECK_NEAR(interpolate_angle_degrees(350.0, 10.0, 0.5), 0.0, 0.0001);
   MB_CHECK_NEAR(interpolate_positive_scale(50.0, 200.0, 0.5), 100.0, 0.001);
 
-  const auto middle = interpolate_corrected_transform(a, a_fix, b, b_fix, 0.5);
-  MB_CHECK_NEAR(middle.x, 65.0, 0.0001);
+  const auto middle = interpolate_transform(a, b, 0.5);
+  MB_CHECK_NEAR(middle.x, 60.0, 0.0001);
   MB_CHECK_NEAR(middle.rx, 0.0, 0.0001);
   MB_CHECK_NEAR(middle.opacity, 50.0, 0.0001);
 
-  const auto before_start = interpolate_corrected_transform(a, a_fix, b, b_fix, -1.0);
-  const auto after_end = interpolate_corrected_transform(a, a_fix, b, b_fix, 2.0);
-  MB_CHECK_NEAR(before_start.x, at_a.x, 0.0001);
-  MB_CHECK_NEAR(after_end.x, at_b.x, 0.0001);
+  const auto before_start = interpolate_transform(a, b, -1.0);
+  const auto after_end = interpolate_transform(a, b, 2.0);
+  MB_CHECK_NEAR(before_start.x, -90.0, 0.0001);
+  MB_CHECK_NEAR(after_end.x, 210.0, 0.0001);
+  MB_CHECK_NEAR(before_start.rx, 330.0, 0.0001);
+  MB_CHECK_NEAR(after_end.rx, 30.0, 0.0001);
+  MB_CHECK_NEAR(before_start.scale, 12.5, 0.0001);
+  MB_CHECK_NEAR(after_end.scale, 800.0, 0.0001);
+
+  TransformCorrection correction{};
+  correction.x = 10.0;
+  correction.y = -20.0;
+  correction.rotation = 30.0;
+  correction.scale = 20.0;
+  correction.aspect = 10.0;
+  const auto sampling = make_sampling_transform(correction, 0.5, 100.0F, 50.0F);
+  MB_CHECK_NEAR(sampling.tx, 5.0F, 0.0001F);
+  MB_CHECK_NEAR(sampling.ty, -10.0F, 0.0001F);
+  MB_CHECK_NEAR(sampling.rotation, 15.0F, 0.0001F);
+  MB_CHECK_NEAR(sampling.sx, 1.155F, 0.0001F);
+  MB_CHECK_NEAR(sampling.sy, 1.045F, 0.0001F);
+  MB_CHECK_NEAR(sampling.cx, 100.0F, 0.0001F);
+  MB_CHECK_NEAR(sampling.cy, 50.0F, 0.0001F);
+
+  const auto extrapolated = make_sampling_transform(correction, 2.0, 100.0F, 50.0F);
+  MB_CHECK_NEAR(extrapolated.tx, 20.0F, 0.0001F);
+  MB_CHECK_NEAR(extrapolated.rotation, 60.0F, 0.0001F);
+  MB_CHECK_NEAR(extrapolated.sx, 1.68F, 0.0001F);
+  MB_CHECK_NEAR(extrapolated.sy, 1.12F, 0.0001F);
+
+  TransformCorrection after_correction{};
+  after_correction.x = 20.0;
+  const auto pair = make_sampling_transforms(
+      correction, after_correction, 1.25, 100.0F, 50.0F, 80.0F, 40.0F);
+  MB_CHECK_NEAR(pair.first.tx, 12.5F, 0.0001F);
+  MB_CHECK_NEAR(pair.second.tx, -5.0F, 0.0001F);
 }

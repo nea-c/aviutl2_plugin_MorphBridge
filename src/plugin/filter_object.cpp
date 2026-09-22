@@ -27,50 +27,33 @@ std::atomic_uint64_t edit_generation{1};
 std::atomic_uint64_t clear_generation{1};
 EDIT_HANDLE* edit_handle{};
 
-FILTER_ITEM_TRACK progress{L"Progress", 0.0, 0.0, 100.0, 0.01};
-FILTER_ITEM_COLOR color{L"Color", 0xffffff};
-FILTER_ITEM_TRACK alpha_threshold{L"Alpha threshold", 50.0, 0.0, 100.0, 0.1};
-FILTER_ITEM_SELECT::ITEM scale_items[]{
-    {L"25%", 25}, {L"50%", 50}, {L"100%", 100}, {nullptr, 0}};
-FILTER_ITEM_SELECT sdf_scale{L"SDF scale", 50, scale_items};
+FILTER_ITEM_TRACK progress{L"進捗", 0.0, 0.0, 100.0, 0.01};
+FILTER_ITEM_COLOR color{L"色", 0xffffff};
+FILTER_ITEM_TRACK alpha_threshold{L"アルファしきい値", 50.0, 0.0, 100.0, 0.1};
 
-FILTER_ITEM_GROUP a_corrections{L"A Corrections"};
-FILTER_ITEM_TRACK a_x{L"Position X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_y{L"Position Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_z{L"Position Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_cx{L"Center X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_cy{L"Center Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_cz{L"Center Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_rx{L"Rotation X", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_ry{L"Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_rz{L"Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_scale{L"Scale", 0.0, -99.0, 1000.0, 0.1};
-FILTER_ITEM_TRACK a_aspect{L"Aspect", 0.0, -99.0, 99.0, 0.1};
+FILTER_ITEM_GROUP a_corrections{L"A補正"};
+FILTER_ITEM_TRACK a_x{L"A補正::X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_y{L"A補正::Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_scale{L"A補正::拡大率", 0.0, -99.0, 1000.0, 0.1};
+FILTER_ITEM_TRACK a_rotation{L"A補正::回転", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK a_aspect{L"A補正::縦横比", 0.0, -99.0, 99.0, 0.1};
 FILTER_ITEM_GROUP a_corrections_end{L""};
 
-FILTER_ITEM_GROUP b_corrections{L"B Corrections"};
-FILTER_ITEM_TRACK b_x{L"B Position X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_y{L"B Position Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_z{L"B Position Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cx{L"B Center X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cy{L"B Center Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cz{L"B Center Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_rx{L"B Rotation X", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_ry{L"B Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_rz{L"B Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_scale{L"B Scale", 0.0, -99.0, 1000.0, 0.1};
-FILTER_ITEM_TRACK b_aspect{L"B Aspect", 0.0, -99.0, 99.0, 0.1};
+FILTER_ITEM_GROUP b_corrections{L"B補正"};
+FILTER_ITEM_TRACK b_x{L"B補正::X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_y{L"B補正::Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_scale{L"B補正::拡大率", 0.0, -99.0, 1000.0, 0.1};
+FILTER_ITEM_TRACK b_rotation{L"B補正::回転", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_aspect{L"B補正::縦横比", 0.0, -99.0, 99.0, 0.1};
 FILTER_ITEM_GROUP b_corrections_end{L""};
 
 void* filter_items[]{
-    &progress, &color, &alpha_threshold, &sdf_scale,
+    &progress, &color, &alpha_threshold,
     &a_corrections,
-    &a_x, &a_y, &a_z, &a_cx, &a_cy, &a_cz,
-    &a_rx, &a_ry, &a_rz, &a_scale, &a_aspect,
+    &a_x, &a_y, &a_scale, &a_rotation, &a_aspect,
     &a_corrections_end,
     &b_corrections,
-    &b_x, &b_y, &b_z, &b_cx, &b_cy, &b_cz,
-    &b_rx, &b_ry, &b_rz, &b_scale, &b_aspect,
+    &b_x, &b_y, &b_scale, &b_rotation, &b_aspect,
     &b_corrections_end,
     nullptr};
 
@@ -147,17 +130,11 @@ StandardTransform from_sdk_transform(const OBJECT_IMAGE_PARAM& input) {
 }
 
 TransformCorrection a_correction() {
-  return {a_x.value, a_y.value, a_z.value,
-          a_cx.value, a_cy.value, a_cz.value,
-          a_rx.value, a_ry.value, a_rz.value,
-          a_scale.value, a_aspect.value};
+  return {a_x.value, a_y.value, a_scale.value, a_aspect.value, a_rotation.value};
 }
 
 TransformCorrection b_correction() {
-  return {b_x.value, b_y.value, b_z.value,
-          b_cx.value, b_cy.value, b_cz.value,
-          b_rx.value, b_ry.value, b_rz.value,
-          b_scale.value, b_aspect.value};
+  return {b_x.value, b_y.value, b_scale.value, b_aspect.value, b_rotation.value};
 }
 
 void apply_output_transform(
@@ -183,9 +160,8 @@ void apply_output_transform(
           &after_param, sizeof(after_param))) {
     return;
   }
-  const auto output = interpolate_corrected_transform(
-      from_sdk_transform(before_param), a_correction(),
-      from_sdk_transform(after_param), b_correction(), amount);
+  const auto output = interpolate_transform(
+      from_sdk_transform(before_param), from_sdk_transform(after_param), amount);
   const auto factors = scale_factors(output.scale, output.aspect);
   video.param->x = static_cast<float>(output.x);
   video.param->y = static_cast<float>(output.y);
@@ -236,7 +212,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   const int threshold_value = static_cast<int>(std::lround(alpha_threshold.value));
   const auto signature = make_signature(
       scene_id, video->scene->width, video->scene->height,
-      before_descriptor, after_descriptor, threshold_value, sdf_scale.value, 1);
+      before_descriptor, after_descriptor, threshold_value, 100, 1);
   const auto observation = state->preparation.observe(
       edit_generation.load(std::memory_order_relaxed), signature);
 
@@ -266,7 +242,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
     }
   }
 
-  const double amount = std::clamp(progress.value / 100.0, 0.0, 1.0);
+  const double amount = progress.value / 100.0;
   apply_output_transform(*video, before, after, *pair, amount);
   const auto prepared = state->preparation.ready();
   if (!prepared) {
@@ -276,7 +252,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   const auto canvas = make_canvas_layout(
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
-      sdf_scale.value, 4);
+      100, 4);
   if (!canvas) {
     warn_once(state, L"the SDF canvas could not be created");
     output_transparent(video);
@@ -296,6 +272,18 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       color.value.g / 255.0F,
       color.value.b / 255.0F,
       1.0F};
+  const auto center = [](const PlacementRect& rect) {
+    return std::pair{
+        rect.left + rect.width * 0.5F,
+        rect.top + rect.height * 0.5F};
+  };
+  const auto [before_center_x, before_center_y] = center(canvas->before);
+  const auto [after_center_x, after_center_y] = center(canvas->after);
+  const auto sampling = make_sampling_transforms(
+      a_correction(), b_correction(), amount,
+      before_center_x, before_center_y, after_center_x, after_center_y);
+  request.before_sampling = sampling.first;
+  request.after_sampling = sampling.second;
   const auto rendered = state->renderer.render(request);
   if (rendered.error != RenderError::None) {
     warn_once(state, L"GPU rendering failed");

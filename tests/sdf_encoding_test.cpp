@@ -32,5 +32,6 @@ void run_sdf_encoding_tests() {
 
   MB_CHECK(inside(interpolate_sdf(-10.0F, 10.0F, 0.25F)));
   MB_CHECK(!inside(interpolate_sdf(-10.0F, 10.0F, 0.75F)));
+  MB_CHECK_NEAR(interpolate_sdf(-10.0F, 10.0F, 1.5F), 20.0F, 0.0001F);
   MB_CHECK(alpha_from_sdf(0.0F, 1.0F) > 0.49F);
 }
