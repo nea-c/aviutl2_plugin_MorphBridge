@@ -32,6 +32,8 @@ class PreparationState {
       EndpointSignature signature,
       PreparedEndpoints images);
 
+  void fail(std::uint64_t request_id, EndpointSignature signature);
+
   [[nodiscard]] std::uint64_t active_request() const;
   [[nodiscard]] std::shared_ptr<const PreparedEndpoints> ready() const;
   [[nodiscard]] CacheStatus status() const;

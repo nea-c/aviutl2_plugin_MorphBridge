@@ -3,6 +3,7 @@
 
 #include "plugin2.h"
 #include "filter2.h"
+#include "plugin/filter_object.hpp"
 
 namespace {
 
@@ -19,8 +20,12 @@ extern "C" __declspec(dllexport) COMMON_PLUGIN_TABLE* GetCommonPluginTable() {
 
 extern "C" __declspec(dllexport) bool InitializePlugin(DWORD) { return true; }
 
-extern "C" __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE*) {}
+extern "C" __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
+  morph_bridge::register_morph_bridge(host);
+}
 
 extern "C" __declspec(dllexport) void UninitializePlugin() {}
 
-extern "C" __declspec(dllexport) DWORD RequiredVersion() { return 2'010'800; }
+extern "C" __declspec(dllexport) DWORD RequiredVersion() {
+  return morph_bridge::required_version();
+}

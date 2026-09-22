@@ -25,7 +25,8 @@ add_library(
   src/render/sdf_encoding.cpp
   src/render/standard_transform.cpp
   src/render/sdf_plan.cpp
-  src/render/gpu_renderer.cpp)
+  src/render/gpu_renderer.cpp
+  src/plugin/filter_object.cpp)
 target_include_directories(morph_bridge_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(morph_bridge_core PUBLIC cxx_std_20)
 target_compile_options(morph_bridge_core PRIVATE /utf-8 /W4 /permissive-)
@@ -90,7 +91,9 @@ if(BUILD_TESTING)
     tests/sdf_encoding_test.cpp
     tests/standard_transform_test.cpp
     tests/sdf_plan_test.cpp
-    tests/gpu_renderer_contract_test.cpp)
+    tests/gpu_renderer_contract_test.cpp
+    tests/plugin_registration_test.cpp
+    tests/filter_object_test.cpp)
   target_compile_features(morph_bridge_tests PRIVATE cxx_std_20)
   target_compile_options(morph_bridge_tests PRIVATE /utf-8 /W4 /permissive-)
   target_link_libraries(morph_bridge_tests PRIVATE morph_bridge_core)

@@ -49,6 +49,18 @@ bool PreparationState::complete(
   return true;
 }
 
+void PreparationState::fail(
+    const std::uint64_t request_id, const EndpointSignature signature) {
+  std::scoped_lock lock{mutex_};
+  if (request_id != active_request_id_ || !active_signature_ ||
+      *active_signature_ != signature) {
+    return;
+  }
+  active_request_id_ = 0;
+  active_signature_.reset();
+  status_ = CacheStatus::Error;
+}
+
 std::uint64_t PreparationState::active_request() const {
   std::scoped_lock lock{mutex_};
   return active_request_id_;
