@@ -13,6 +13,11 @@ bool created_edit_handle{};
 std::vector<EVENT_TYPE> registered_events;
 bool clear_handler_registered{};
 
+struct FilterItemPrefix {
+  LPCWSTR type;
+  LPCWSTR name;
+};
+
 void register_filter(FILTER_PLUGIN_TABLE* table) { registered_filter = table; }
 
 EDIT_HANDLE* create_edit() {
@@ -59,10 +64,20 @@ void run_plugin_registration_tests() {
   MB_CHECK(std::wstring{progress->name} == L"Progress");
   MB_CHECK(progress->value == 0.0);
   int item_count = 0;
+  bool has_a_corrections = false;
+  bool has_b_corrections = false;
   for (void** item = registered_filter->items; *item != nullptr; ++item) {
+    const auto* prefix = static_cast<const FilterItemPrefix*>(*item);
+    MB_CHECK(std::wstring{prefix->type} != L"trackgroup");
+    if (std::wstring{prefix->type} == L"group") {
+      has_a_corrections |= std::wstring{prefix->name} == L"A Corrections";
+      has_b_corrections |= std::wstring{prefix->name} == L"B Corrections";
+    }
     ++item_count;
   }
-  MB_CHECK(item_count == 12);
+  MB_CHECK(has_a_corrections);
+  MB_CHECK(has_b_corrections);
+  MB_CHECK(item_count == 30);
   MB_CHECK(registered_filter->func_create != nullptr);
   MB_CHECK(registered_filter->func_destroy != nullptr);
 }

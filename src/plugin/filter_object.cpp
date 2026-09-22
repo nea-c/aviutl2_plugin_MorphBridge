@@ -34,50 +34,44 @@ FILTER_ITEM_SELECT::ITEM scale_items[]{
     {L"25%", 25}, {L"50%", 50}, {L"100%", 100}, {nullptr, 0}};
 FILTER_ITEM_SELECT sdf_scale{L"SDF scale", 50, scale_items};
 
-FILTER_ITEM_TRACK a_x{L"X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_y{L"Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_z{L"Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK* a_position_tracks[]{&a_x, &a_y, &a_z, nullptr};
-FILTER_ITEM_TRACK_GROUP a_position{L"A Position", a_position_tracks};
-FILTER_ITEM_TRACK a_cx{L"X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_cy{L"Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_cz{L"Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK* a_center_tracks[]{&a_cx, &a_cy, &a_cz, nullptr};
-FILTER_ITEM_TRACK_GROUP a_center{L"A Center", a_center_tracks};
-FILTER_ITEM_TRACK a_rx{L"X", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_ry{L"Y", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_rz{L"Z", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK* a_rotation_tracks[]{&a_rx, &a_ry, &a_rz, nullptr};
-FILTER_ITEM_TRACK_GROUP a_rotation{L"A Rotation", a_rotation_tracks};
+FILTER_ITEM_GROUP a_corrections{L"A Corrections"};
+FILTER_ITEM_TRACK a_x{L"Position X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_y{L"Position Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_z{L"Position Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_cx{L"Center X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_cy{L"Center Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_cz{L"Center Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK a_rx{L"Rotation X", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK a_ry{L"Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK a_rz{L"Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
 FILTER_ITEM_TRACK a_scale{L"Scale", 0.0, -99.0, 1000.0, 0.1};
 FILTER_ITEM_TRACK a_aspect{L"Aspect", 0.0, -99.0, 99.0, 0.1};
-FILTER_ITEM_TRACK* a_scale_tracks[]{&a_scale, &a_aspect, nullptr};
-FILTER_ITEM_TRACK_GROUP a_scale_group{L"A Scale / Aspect", a_scale_tracks};
+FILTER_ITEM_GROUP a_corrections_end{L""};
 
-FILTER_ITEM_TRACK b_x{L"X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_y{L"Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_z{L"Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK* b_position_tracks[]{&b_x, &b_y, &b_z, nullptr};
-FILTER_ITEM_TRACK_GROUP b_position{L"B Position", b_position_tracks};
-FILTER_ITEM_TRACK b_cx{L"X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cy{L"Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_cz{L"Z", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK* b_center_tracks[]{&b_cx, &b_cy, &b_cz, nullptr};
-FILTER_ITEM_TRACK_GROUP b_center{L"B Center", b_center_tracks};
-FILTER_ITEM_TRACK b_rx{L"X", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_ry{L"Y", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_rz{L"Z", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK* b_rotation_tracks[]{&b_rx, &b_ry, &b_rz, nullptr};
-FILTER_ITEM_TRACK_GROUP b_rotation{L"B Rotation", b_rotation_tracks};
+FILTER_ITEM_GROUP b_corrections{L"B Corrections"};
+FILTER_ITEM_TRACK b_x{L"Position X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_y{L"Position Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_z{L"Position Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cx{L"Center X", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cy{L"Center Y", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_cz{L"Center Z", 0.0, -5000.0, 5000.0, 0.1};
+FILTER_ITEM_TRACK b_rx{L"Rotation X", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_ry{L"Rotation Y", 0.0, -3600.0, 3600.0, 0.1};
+FILTER_ITEM_TRACK b_rz{L"Rotation Z", 0.0, -3600.0, 3600.0, 0.1};
 FILTER_ITEM_TRACK b_scale{L"Scale", 0.0, -99.0, 1000.0, 0.1};
 FILTER_ITEM_TRACK b_aspect{L"Aspect", 0.0, -99.0, 99.0, 0.1};
-FILTER_ITEM_TRACK* b_scale_tracks[]{&b_scale, &b_aspect, nullptr};
-FILTER_ITEM_TRACK_GROUP b_scale_group{L"B Scale / Aspect", b_scale_tracks};
+FILTER_ITEM_GROUP b_corrections_end{L""};
 
 void* filter_items[]{
     &progress, &color, &alpha_threshold, &sdf_scale,
-    &a_position, &a_center, &a_rotation, &a_scale_group,
-    &b_position, &b_center, &b_rotation, &b_scale_group,
+    &a_corrections,
+    &a_x, &a_y, &a_z, &a_cx, &a_cy, &a_cz,
+    &a_rx, &a_ry, &a_rz, &a_scale, &a_aspect,
+    &a_corrections_end,
+    &b_corrections,
+    &b_x, &b_y, &b_z, &b_cx, &b_cy, &b_cz,
+    &b_rx, &b_ry, &b_rz, &b_scale, &b_aspect,
+    &b_corrections_end,
     nullptr};
 
 struct InstanceState {

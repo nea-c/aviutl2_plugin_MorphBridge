@@ -23,8 +23,8 @@ mode. There is intentionally no automatic-progress switch.
 - `Color`: solid output color.
 - `Alpha threshold`: converts the captured alpha into a silhouette.
 - `SDF scale`: 25%, 50%, or 100% working resolution.
-- `A/B Position`, `Center`, `Rotation`, and `Scale / Aspect`: additive endpoint
-  corrections. A correction fades out toward B; B correction fades in from A.
+- `A/B Corrections`: grouped Position, Center, Rotation, Scale, and Aspect
+  tracks. A correction fades out toward B; B correction fades in from A.
 
 The endpoint position, center, rotation, scale/aspect, and opacity are read at
 the endpoint frames and interpolated automatically. Rotation uses the shortest

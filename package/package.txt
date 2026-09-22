@@ -1,4 +1,4 @@
-MorphBridge 0.1.0
+MorphBridge 0.1.1
 
 AviUtl2 2.1.8 以降 / Windows x64 専用です。
 「メディアオブジェクト」から MorphBridge を追加し、同じレイヤーへ
