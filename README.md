@@ -86,3 +86,7 @@ cmake --build --preset release --target package
   are outside the v1 capture contract.
 - Real AviUtl2/GPU smoke-test results are tracked in
   `docs/manual-test-checklist.md`; an unchecked item is not a claimed pass.
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
