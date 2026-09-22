@@ -1,0 +1,8 @@
+function(morph_bridge_require_windows_x64 is_windows pointer_size)
+  if(NOT is_windows)
+    message(FATAL_ERROR "MorphBridge supports Windows only")
+  endif()
+  if(NOT pointer_size EQUAL 8)
+    message(FATAL_ERROR "MorphBridge supports x64 only")
+  endif()
+endfunction()
