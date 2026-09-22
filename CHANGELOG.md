@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.6 - 2026-09-22
+
+- Rebuild transient GPU SDF resources before every draw so AviUtl2 never
+  receives a stale image-resource name, eliminating the alternating blank
+  frames and `executePixelShader invalid image resource` warnings.
+- Expand the SDF canvas automatically around weighted A/B X, Y, scale,
+  rotation, and aspect corrections so corrected silhouettes are not clipped.
+
 ## 0.1.5 - 2026-09-22
 
 - Rebuild endpoint captures when the edit generation changes, including edits

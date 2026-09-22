@@ -39,8 +39,12 @@ path and positive scale uses geometric interpolation.
 MorphBridge compares the complete A/B aliases, endpoint frames, scene size,
 alpha threshold, fixed SDF resolution, cache format, and edit generation. It
 captures again when either the signature or generation changes. Rapid edits are
-coalesced and stale asynchronous results are discarded. AviUtl2 cache clearing
-keeps the owned CPU endpoints and reconstructs GPU resources automatically.
+coalesced and stale asynchronous results are discarded. CPU endpoint images are
+retained, while transient GPU SDF resources are reconstructed before each draw
+because AviUtl2 does not preserve those image resources between render calls.
+
+The SDF canvas expands automatically to contain the currently weighted A/B
+corrections, including translation, scale, rotation, and aspect changes.
 
 Extrapolated progress uses an adaptive transparent SDF margin. Beyond 0% or
 100%, the contour remains limited to a size-dependent neighborhood around the

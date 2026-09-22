@@ -216,44 +216,34 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   after_plan->upload = resources.after.upload;
 
   std::scoped_lock lock{mutex_};
-  const CacheIdentity identity{
-      request.effect_id, request.signature, request.cache_generation,
-      request.layout.width, request.layout.height};
-  const bool warm = expected_cache_ == identity;
-  const auto fail = [this](const RenderError error, const bool rebuilt) {
-    expected_cache_.reset();
-    return RenderResult{error, rebuilt};
-  };
   const float maximum_distance = std::hypot(
       static_cast<float>(request.layout.width),
       static_cast<float>(request.layout.height));
 
-  if (!warm) {
-    const auto before_pixels = place_image(
-        request.endpoints->before, request.layout, request.layout.before);
-    const auto after_pixels = place_image(
-        request.endpoints->after, request.layout, request.layout.after);
-    if (before_pixels.empty() || after_pixels.empty()) {
-      return fail(RenderError::InvalidRequest, false);
-    }
-    const int pitch = request.layout.width * 4;
-    if (!video.set_image_resource_data(
-            before_plan->upload.c_str(), before_pixels.data(),
-            request.layout.width, request.layout.height, pitch,
-            INPUT_PIXEL_FORMAT::RGBA) ||
-        !video.set_image_resource_data(
-            after_plan->upload.c_str(), after_pixels.data(),
-            request.layout.width, request.layout.height, pitch,
-            INPUT_PIXEL_FORMAT::RGBA)) {
-      return fail(RenderError::UploadFailed, false);
-    }
-    create_endpoint_resources(video, *before_plan);
-    create_endpoint_resources(video, *after_plan);
-    const float threshold = std::clamp(request.alpha_threshold, 0.0F, 1.0F);
-    if (!build_endpoint_sdf(video, *before_plan, threshold, maximum_distance) ||
-        !build_endpoint_sdf(video, *after_plan, threshold, maximum_distance)) {
-      return fail(RenderError::ComputeFailed, false);
-    }
+  const auto before_pixels = place_image(
+      request.endpoints->before, request.layout, request.layout.before);
+  const auto after_pixels = place_image(
+      request.endpoints->after, request.layout, request.layout.after);
+  if (before_pixels.empty() || after_pixels.empty()) {
+    return {RenderError::InvalidRequest, false};
+  }
+  const int pitch = request.layout.width * 4;
+  if (!video.set_image_resource_data(
+          before_plan->upload.c_str(), before_pixels.data(),
+          request.layout.width, request.layout.height, pitch,
+          INPUT_PIXEL_FORMAT::RGBA) ||
+      !video.set_image_resource_data(
+          after_plan->upload.c_str(), after_pixels.data(),
+          request.layout.width, request.layout.height, pitch,
+          INPUT_PIXEL_FORMAT::RGBA)) {
+    return {RenderError::UploadFailed, false};
+  }
+  create_endpoint_resources(video, *before_plan);
+  create_endpoint_resources(video, *after_plan);
+  const float threshold = std::clamp(request.alpha_threshold, 0.0F, 1.0F);
+  if (!build_endpoint_sdf(video, *before_plan, threshold, maximum_distance) ||
+      !build_endpoint_sdf(video, *after_plan, threshold, maximum_distance)) {
+    return {RenderError::ComputeFailed, true};
   }
 
   const auto [before_row0, before_row1] = inverse_rows(request.before_sampling);
@@ -276,10 +266,9 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
           shaders::morph_cso, static_cast<int>(shaders::morph_cso_size),
           L"object", sdf_resources.data(), static_cast<int>(sdf_resources.size()),
           &constants, sizeof(constants), nullptr, nullptr)) {
-    return fail(RenderError::PixelFailed, !warm);
+    return {RenderError::PixelFailed, true};
   }
-  expected_cache_ = identity;
-  return {RenderError::None, !warm};
+  return {RenderError::None, true};
 }
 
 }  // namespace morph_bridge

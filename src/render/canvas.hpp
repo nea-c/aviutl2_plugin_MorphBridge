@@ -43,4 +43,14 @@ struct ExtrapolationEnvelope {
     int scale_percent,
     int margin);
 
+[[nodiscard]] std::optional<CanvasLayout> make_transformed_canvas_layout(
+    int before_width,
+    int before_height,
+    int after_width,
+    int after_height,
+    int scale_percent,
+    int base_margin,
+    SamplingTransform before_sampling,
+    SamplingTransform after_sampling);
+
 }  // namespace morph_bridge

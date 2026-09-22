@@ -172,8 +172,8 @@ void run_gpu_renderer_contract_tests() {
   active_recorder = &warm;
   const auto warm_result = renderer.render(request(video, images));
   MB_CHECK(warm_result.error == RenderError::None);
-  MB_CHECK(!warm_result.rebuilt);
-  MB_CHECK(warm.upload_count == 0);
+  MB_CHECK(warm_result.rebuilt);
+  MB_CHECK(warm.upload_count == 2);
   MB_CHECK(warm.size_query_count == 0);
   MB_CHECK(warm.calls.front() == L"object");
   MB_CHECK(warm.calls.back() == L"pixel:object");

@@ -253,10 +253,12 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
       100);
-  const auto canvas = envelope ? make_canvas_layout(
+  const auto sampling = make_sampling_transforms(
+      a_correction(), b_correction(), amount, 0.0F, 0.0F, 0.0F, 0.0F);
+  const auto canvas = envelope ? make_transformed_canvas_layout(
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
-      100, envelope->margin) : std::nullopt;
+      100, envelope->margin, sampling.first, sampling.second) : std::nullopt;
   if (!canvas) {
     warn_once(state, L"the SDF canvas could not be created");
     output_transparent(video);
@@ -277,18 +279,8 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       color.value.g / 255.0F,
       color.value.b / 255.0F,
       1.0F};
-  const auto center = [](const PlacementRect& rect) {
-    return std::pair{
-        rect.left + rect.width * 0.5F,
-        rect.top + rect.height * 0.5F};
-  };
-  const auto [before_center_x, before_center_y] = center(canvas->before);
-  const auto [after_center_x, after_center_y] = center(canvas->after);
-  const auto sampling = make_sampling_transforms(
-      a_correction(), b_correction(), amount,
-      before_center_x, before_center_y, after_center_x, after_center_y);
-  request.before_sampling = sampling.first;
-  request.after_sampling = sampling.second;
+  request.before_sampling = canvas->before_sampling;
+  request.after_sampling = canvas->after_sampling;
   const auto rendered = state->renderer.render(request);
   if (rendered.error != RenderError::None) {
     warn_once(state, L"GPU rendering failed");

@@ -14,7 +14,6 @@
 
 #include <array>
 #include <mutex>
-#include <optional>
 
 namespace morph_bridge {
 
@@ -60,17 +59,7 @@ class GpuRenderer {
   [[nodiscard]] RenderResult render(const GpuRenderRequest& request);
 
  private:
-  struct CacheIdentity {
-    std::uint64_t effect_id{};
-    EndpointSignature signature;
-    std::uint64_t cache_generation{};
-    int width{};
-    int height{};
-    friend bool operator==(const CacheIdentity&, const CacheIdentity&) = default;
-  };
-
   std::mutex mutex_;
-  std::optional<CacheIdentity> expected_cache_;
 };
 
 }  // namespace morph_bridge
