@@ -1,5 +1,7 @@
 #include "cache/signature.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
@@ -61,7 +63,7 @@ void add_all(
     const int scene_height,
     const EndpointDescriptor& before,
     const EndpointDescriptor& after,
-    const int alpha_threshold_percent,
+    const int alpha_threshold_basis_points,
     const int sdf_scale_percent,
     const std::uint32_t cache_format_version) {
   hash.integer(cache_format_version);
@@ -70,11 +72,15 @@ void add_all(
   hash.integer(scene_height);
   add_endpoint(hash, before);
   add_endpoint(hash, after);
-  hash.integer(alpha_threshold_percent);
+  hash.integer(alpha_threshold_basis_points);
   hash.integer(sdf_scale_percent);
 }
 
 }  // namespace
+
+int quantize_alpha_threshold(const double percent) {
+  return static_cast<int>(std::lround(std::clamp(percent, 0.0, 100.0) * 100.0));
+}
 
 EndpointSignature make_signature(
     const std::int64_t scene_token,
@@ -82,15 +88,15 @@ EndpointSignature make_signature(
     const int scene_height,
     const EndpointDescriptor& before,
     const EndpointDescriptor& after,
-    const int alpha_threshold_percent,
+    const int alpha_threshold_basis_points,
     const int sdf_scale_percent,
     const std::uint32_t cache_format_version) {
   Fnv1a64 high{14'695'981'039'346'656'037ULL};
   Fnv1a64 low{7'807'829'856'337'127'661ULL};
   add_all(high, scene_token, scene_width, scene_height, before, after,
-          alpha_threshold_percent, sdf_scale_percent, cache_format_version);
+          alpha_threshold_basis_points, sdf_scale_percent, cache_format_version);
   add_all(low, scene_token, scene_width, scene_height, before, after,
-          alpha_threshold_percent, sdf_scale_percent, cache_format_version);
+          alpha_threshold_basis_points, sdf_scale_percent, cache_format_version);
   return {high.value(), low.value()};
 }
 

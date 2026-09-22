@@ -3,8 +3,11 @@
 
 using morph_bridge::EndpointDescriptor;
 using morph_bridge::make_signature;
+using morph_bridge::quantize_alpha_threshold;
 
 void run_signature_tests() {
+  MB_CHECK(quantize_alpha_threshold(50.01) == 5001);
+
   EndpointDescriptor a{{1, 2, 0, 9}, 9, "alias-a"};
   EndpointDescriptor b{{3, 2, 20, 29}, 20, "alias-b"};
 

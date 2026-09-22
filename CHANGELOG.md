@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.8 - 2026-09-23
+
+- Rename the correction groups to `前オブジェクト補正` and
+  `後オブジェクト補正`, and shorten `アルファしきい値` to `しきい値`.
+- Increase correction precision to 0.001 for scale and 0.01 for X, Y,
+  rotation, and the silhouette threshold; aspect uses 0.001 precision.
+- Expand X/Y to -100000–100000, scale to 0–10000, and aspect to -100–100.
+  Scale now uses 100 as its neutral default and interpolates from that value.
+
 ## 0.1.7 - 2026-09-22
 
 - Extend signed distance continuously beyond each SDF texture boundary instead

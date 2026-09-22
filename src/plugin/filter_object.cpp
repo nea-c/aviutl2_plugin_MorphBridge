@@ -29,22 +29,22 @@ EDIT_HANDLE* edit_handle{};
 
 FILTER_ITEM_TRACK progress{L"進捗", 0.0, 0.0, 100.0, 0.01};
 FILTER_ITEM_COLOR color{L"色", 0xffffff};
-FILTER_ITEM_TRACK alpha_threshold{L"アルファしきい値", 50.0, 0.0, 100.0, 0.1};
+FILTER_ITEM_TRACK alpha_threshold{L"しきい値", 50.0, 0.0, 100.0, 0.01};
 
-FILTER_ITEM_GROUP a_corrections{L"A補正"};
-FILTER_ITEM_TRACK a_x{L"A補正::X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_y{L"A補正::Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK a_scale{L"A補正::拡大率", 0.0, -99.0, 1000.0, 0.1};
-FILTER_ITEM_TRACK a_rotation{L"A補正::回転", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK a_aspect{L"A補正::縦横比", 0.0, -99.0, 99.0, 0.1};
+FILTER_ITEM_GROUP a_corrections{L"前オブジェクト補正"};
+FILTER_ITEM_TRACK a_x{L"前オブジェクト補正::X", 0.0, -100000.0, 100000.0, 0.01};
+FILTER_ITEM_TRACK a_y{L"前オブジェクト補正::Y", 0.0, -100000.0, 100000.0, 0.01};
+FILTER_ITEM_TRACK a_scale{L"前オブジェクト補正::拡大率", 100.0, 0.0, 10000.0, 0.001};
+FILTER_ITEM_TRACK a_rotation{L"前オブジェクト補正::回転", 0.0, -3600.0, 3600.0, 0.01};
+FILTER_ITEM_TRACK a_aspect{L"前オブジェクト補正::縦横比", 0.0, -100.0, 100.0, 0.001};
 FILTER_ITEM_GROUP a_corrections_end{L""};
 
-FILTER_ITEM_GROUP b_corrections{L"B補正"};
-FILTER_ITEM_TRACK b_x{L"B補正::X", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_y{L"B補正::Y", 0.0, -5000.0, 5000.0, 0.1};
-FILTER_ITEM_TRACK b_scale{L"B補正::拡大率", 0.0, -99.0, 1000.0, 0.1};
-FILTER_ITEM_TRACK b_rotation{L"B補正::回転", 0.0, -3600.0, 3600.0, 0.1};
-FILTER_ITEM_TRACK b_aspect{L"B補正::縦横比", 0.0, -99.0, 99.0, 0.1};
+FILTER_ITEM_GROUP b_corrections{L"後オブジェクト補正"};
+FILTER_ITEM_TRACK b_x{L"後オブジェクト補正::X", 0.0, -100000.0, 100000.0, 0.01};
+FILTER_ITEM_TRACK b_y{L"後オブジェクト補正::Y", 0.0, -100000.0, 100000.0, 0.01};
+FILTER_ITEM_TRACK b_scale{L"後オブジェクト補正::拡大率", 100.0, 0.0, 10000.0, 0.001};
+FILTER_ITEM_TRACK b_rotation{L"後オブジェクト補正::回転", 0.0, -3600.0, 3600.0, 0.01};
+FILTER_ITEM_TRACK b_aspect{L"後オブジェクト補正::縦横比", 0.0, -100.0, 100.0, 0.001};
 FILTER_ITEM_GROUP b_corrections_end{L""};
 
 void* filter_items[]{
@@ -209,7 +209,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   EndpointDescriptor before_descriptor{pair->before, pair->before_frame, before_alias};
   EndpointDescriptor after_descriptor{pair->after, pair->after_frame, after_alias};
   const int scene_id = video->edit->info != nullptr ? video->edit->info->scene_id : 0;
-  const int threshold_value = static_cast<int>(std::lround(alpha_threshold.value));
+  const int threshold_value = quantize_alpha_threshold(alpha_threshold.value);
   const auto signature = make_signature(
       scene_id, video->scene->width, video->scene->height,
       before_descriptor, after_descriptor, threshold_value, 100, 1);
@@ -272,7 +272,7 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   request.signature = signature;
   request.cache_generation = clear_generation.load(std::memory_order_relaxed);
   request.progress = static_cast<float>(amount);
-  request.alpha_threshold = static_cast<float>(threshold_value / 100.0);
+  request.alpha_threshold = static_cast<float>(threshold_value / 10'000.0);
   request.extrapolation_limit = static_cast<float>(envelope->distance_limit);
   request.color = {
       color.value.r / 255.0F,

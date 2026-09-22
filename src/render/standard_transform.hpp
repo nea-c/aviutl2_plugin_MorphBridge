@@ -24,7 +24,7 @@ struct StandardTransform {
 struct TransformCorrection {
   double x{};
   double y{};
-  double scale{};
+  double scale{100.0};
   double aspect{};
   double rotation{};
 };

@@ -83,7 +83,7 @@ SamplingTransform make_sampling_transform(
     const double weight,
     const float center_x,
     const float center_y) {
-  const double scale = 1.0 + correction.scale * weight / 100.0;
+  const double scale = lerp(1.0, correction.scale / 100.0, weight);
   const double aspect = correction.aspect * weight / 100.0;
   SamplingTransform result;
   result.tx = static_cast<float>(correction.x * weight);

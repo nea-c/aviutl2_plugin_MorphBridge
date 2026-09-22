@@ -49,22 +49,27 @@ void run_standard_transform_tests() {
   correction.x = 10.0;
   correction.y = -20.0;
   correction.rotation = 30.0;
-  correction.scale = 20.0;
+  correction.scale = 200.0;
   correction.aspect = 10.0;
   const auto sampling = make_sampling_transform(correction, 0.5, 100.0F, 50.0F);
   MB_CHECK_NEAR(sampling.tx, 5.0F, 0.0001F);
   MB_CHECK_NEAR(sampling.ty, -10.0F, 0.0001F);
   MB_CHECK_NEAR(sampling.rotation, 15.0F, 0.0001F);
-  MB_CHECK_NEAR(sampling.sx, 1.155F, 0.0001F);
-  MB_CHECK_NEAR(sampling.sy, 1.045F, 0.0001F);
+  MB_CHECK_NEAR(sampling.sx, 1.575F, 0.0001F);
+  MB_CHECK_NEAR(sampling.sy, 1.425F, 0.0001F);
   MB_CHECK_NEAR(sampling.cx, 100.0F, 0.0001F);
   MB_CHECK_NEAR(sampling.cy, 50.0F, 0.0001F);
 
   const auto extrapolated = make_sampling_transform(correction, 2.0, 100.0F, 50.0F);
   MB_CHECK_NEAR(extrapolated.tx, 20.0F, 0.0001F);
   MB_CHECK_NEAR(extrapolated.rotation, 60.0F, 0.0001F);
-  MB_CHECK_NEAR(extrapolated.sx, 1.68F, 0.0001F);
-  MB_CHECK_NEAR(extrapolated.sy, 1.12F, 0.0001F);
+  MB_CHECK_NEAR(extrapolated.sx, 3.6F, 0.0001F);
+  MB_CHECK_NEAR(extrapolated.sy, 2.4F, 0.0001F);
+
+  const auto identity_correction = make_sampling_transform(
+      TransformCorrection{}, 1.0, 100.0F, 50.0F);
+  MB_CHECK_NEAR(identity_correction.sx, 1.0F, 0.0001F);
+  MB_CHECK_NEAR(identity_correction.sy, 1.0F, 0.0001F);
 
   TransformCorrection after_correction{};
   after_correction.x = 20.0;

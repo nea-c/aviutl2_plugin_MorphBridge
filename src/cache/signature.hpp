@@ -20,13 +20,15 @@ struct EndpointSignature {
   friend bool operator==(const EndpointSignature&, const EndpointSignature&) = default;
 };
 
+[[nodiscard]] int quantize_alpha_threshold(double percent);
+
 [[nodiscard]] EndpointSignature make_signature(
     std::int64_t scene_token,
     int scene_width,
     int scene_height,
     const EndpointDescriptor& before,
     const EndpointDescriptor& after,
-    int alpha_threshold_percent,
+    int alpha_threshold_basis_points,
     int sdf_scale_percent,
     std::uint32_t cache_format_version);
 

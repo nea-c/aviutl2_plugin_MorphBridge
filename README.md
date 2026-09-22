@@ -22,10 +22,12 @@ no automatic-progress switch.
 
 - `進捗`: silhouette interpolation, including values outside 0–100.
 - `色`: solid output color.
-- `アルファしきい値`: converts the captured alpha into a silhouette.
-- `A補正` / `B補正`: image-centered X, Y, scale, rotation, and aspect tracks.
-  A is weighted by Progress; B is weighted by one minus Progress. These tracks
-  affect SDF sampling only and extrapolate with Progress.
+- `しきい値`: converts the captured alpha into a silhouette.
+- `前オブジェクト補正` / `後オブジェクト補正`: image-centered X, Y,
+  scale, rotation, and aspect tracks. The previous-object correction is weighted
+  by Progress; the next-object correction is weighted by one minus Progress.
+  These tracks affect SDF sampling only and extrapolate with Progress. Scale is
+  an absolute percentage where 100 means no correction.
 
 The SDF is always generated at 100% working resolution.
 

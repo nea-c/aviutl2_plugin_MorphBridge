@@ -2,6 +2,7 @@
 #include "test_support.hpp"
 
 #include <algorithm>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -65,34 +66,59 @@ void run_plugin_registration_tests() {
   MB_CHECK(std::wstring{progress->name} == L"進捗");
   MB_CHECK(progress->value == 0.0);
   int item_count = 0;
-  bool has_a_corrections = false;
-  bool has_b_corrections = false;
+  bool has_before_corrections = false;
+  bool has_after_corrections = false;
   std::set<std::wstring> value_item_names;
+  std::map<std::wstring, const FILTER_ITEM_TRACK*> tracks;
   for (void** item = registered_filter->items; *item != nullptr; ++item) {
     const auto* prefix = static_cast<const FilterItemPrefix*>(*item);
     MB_CHECK(std::wstring{prefix->type} != L"trackgroup");
     if (std::wstring{prefix->type} == L"group") {
-      has_a_corrections |= std::wstring{prefix->name} == L"A補正";
-      has_b_corrections |= std::wstring{prefix->name} == L"B補正";
+      has_before_corrections |= std::wstring{prefix->name} == L"前オブジェクト補正";
+      has_after_corrections |= std::wstring{prefix->name} == L"後オブジェクト補正";
     } else {
       MB_CHECK(value_item_names.insert(prefix->name).second);
+      if (std::wstring{prefix->type} == L"track2") {
+        const auto* track = static_cast<const FILTER_ITEM_TRACK*>(*item);
+        tracks.emplace(track->name, track);
+      }
     }
     ++item_count;
   }
-  MB_CHECK(has_a_corrections);
-  MB_CHECK(has_b_corrections);
+  MB_CHECK(has_before_corrections);
+  MB_CHECK(has_after_corrections);
   MB_CHECK(value_item_names.contains(L"色"));
-  MB_CHECK(value_item_names.contains(L"アルファしきい値"));
-  MB_CHECK(value_item_names.contains(L"A補正::X"));
-  MB_CHECK(value_item_names.contains(L"A補正::Y"));
-  MB_CHECK(value_item_names.contains(L"A補正::拡大率"));
-  MB_CHECK(value_item_names.contains(L"A補正::回転"));
-  MB_CHECK(value_item_names.contains(L"A補正::縦横比"));
-  MB_CHECK(value_item_names.contains(L"B補正::X"));
-  MB_CHECK(value_item_names.contains(L"B補正::Y"));
-  MB_CHECK(value_item_names.contains(L"B補正::拡大率"));
-  MB_CHECK(value_item_names.contains(L"B補正::回転"));
-  MB_CHECK(value_item_names.contains(L"B補正::縦横比"));
+  MB_CHECK(value_item_names.contains(L"しきい値"));
+  MB_CHECK(value_item_names.contains(L"前オブジェクト補正::X"));
+  MB_CHECK(value_item_names.contains(L"前オブジェクト補正::Y"));
+  MB_CHECK(value_item_names.contains(L"前オブジェクト補正::拡大率"));
+  MB_CHECK(value_item_names.contains(L"前オブジェクト補正::回転"));
+  MB_CHECK(value_item_names.contains(L"前オブジェクト補正::縦横比"));
+  MB_CHECK(value_item_names.contains(L"後オブジェクト補正::X"));
+  MB_CHECK(value_item_names.contains(L"後オブジェクト補正::Y"));
+  MB_CHECK(value_item_names.contains(L"後オブジェクト補正::拡大率"));
+  MB_CHECK(value_item_names.contains(L"後オブジェクト補正::回転"));
+  MB_CHECK(value_item_names.contains(L"後オブジェクト補正::縦横比"));
+  const auto check_track = [&](const wchar_t* name, const double value,
+                               const double minimum, const double maximum,
+                               const double step) {
+    const auto* track = tracks.at(name);
+    MB_CHECK(track->value == value);
+    MB_CHECK(track->s == minimum);
+    MB_CHECK(track->e == maximum);
+    MB_CHECK(track->step == step);
+  };
+  check_track(L"しきい値", 50.0, 0.0, 100.0, 0.01);
+  check_track(L"前オブジェクト補正::X", 0.0, -100000.0, 100000.0, 0.01);
+  check_track(L"前オブジェクト補正::Y", 0.0, -100000.0, 100000.0, 0.01);
+  check_track(L"前オブジェクト補正::拡大率", 100.0, 0.0, 10000.0, 0.001);
+  check_track(L"前オブジェクト補正::回転", 0.0, -3600.0, 3600.0, 0.01);
+  check_track(L"前オブジェクト補正::縦横比", 0.0, -100.0, 100.0, 0.001);
+  check_track(L"後オブジェクト補正::X", 0.0, -100000.0, 100000.0, 0.01);
+  check_track(L"後オブジェクト補正::Y", 0.0, -100000.0, 100000.0, 0.01);
+  check_track(L"後オブジェクト補正::拡大率", 100.0, 0.0, 10000.0, 0.001);
+  check_track(L"後オブジェクト補正::回転", 0.0, -3600.0, 3600.0, 0.01);
+  check_track(L"後オブジェクト補正::縦横比", 0.0, -100.0, 100.0, 0.001);
   MB_CHECK(!value_item_names.contains(L"SDF scale"));
   MB_CHECK(item_count == 17);
   MB_CHECK(registered_filter->func_create != nullptr);
