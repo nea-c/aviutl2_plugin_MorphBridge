@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.17 - 2026-09-23
+
+- Widen SDF antialiasing from 1.05 to 1.14 pixels to better match the
+  measured partial-coverage band of the source while preserving the
+  Marching Squares zero contour.
+
 ## 0.1.16 - 2026-09-23
 
 - Reconstruct the 50% alpha contour as connected Marching Squares segments

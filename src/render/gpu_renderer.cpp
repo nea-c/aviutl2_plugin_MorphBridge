@@ -252,7 +252,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
       request.color,
       request.progress,
       maximum_distance,
-      1.05F,
+      1.14F,
       std::clamp(request.color[3], 0.0F, 1.0F),
       request.extrapolation_limit,
       {},
