@@ -27,7 +27,7 @@ std::atomic_uint64_t edit_generation{1};
 std::atomic_uint64_t clear_generation{1};
 EDIT_HANDLE* edit_handle{};
 
-FILTER_ITEM_TRACK progress{L"進捗", 0.0, 0.0, 100.0, 0.01};
+FILTER_ITEM_TRACK progress{L"モーフ量", 0.0, 0.0, 100.0, 0.01};
 FILTER_ITEM_COLOR color{L"色", 0xffffff};
 
 FILTER_ITEM_GROUP a_corrections{L"前オブジェクト補正"};

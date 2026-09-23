@@ -80,7 +80,7 @@ target_include_directories(MorphBridge PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_include_directories(morph_bridge_core PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_link_libraries(morph_bridge_core PUBLIC aviutl2_sdk)
 
-set(MORPH_BRIDGE_RELEASE "r1")
+set(MORPH_BRIDGE_RELEASE "r2")
 set(MORPH_BRIDGE_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/package")
 set(MORPH_BRIDGE_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/package")
 file(MAKE_DIRECTORY "${MORPH_BRIDGE_PACKAGE_DIR}")

@@ -63,7 +63,7 @@ void run_plugin_registration_tests() {
   MB_CHECK(morph_bridge::required_version() == 2'010'800);
   MB_CHECK(registered_filter->items != nullptr);
   auto* progress = static_cast<FILTER_ITEM_TRACK*>(registered_filter->items[0]);
-  MB_CHECK(std::wstring{progress->name} == L"進捗");
+  MB_CHECK(std::wstring{progress->name} == L"モーフ量");
   MB_CHECK(progress->value == 0.0);
   int item_count = 0;
   bool has_before_corrections = false;

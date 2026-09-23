@@ -98,7 +98,7 @@ scene=1
 frame=8,23
 [1.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
@@ -164,7 +164,7 @@ scene=1
 frame=32,47
 [3.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
@@ -230,7 +230,7 @@ scene=1
 frame=56,71
 [5.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
@@ -296,7 +296,7 @@ scene=1
 frame=80,95
 [7.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
@@ -362,7 +362,7 @@ scene=1
 frame=104,119
 [9.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
@@ -429,7 +429,7 @@ focus=1
 frame=128,143
 [11.0]
 effect.name=MorphBridge
-進捗=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
+モーフ量=0.00,100.00,enhanced_tracks.aux2,0|22,0,1,26541
 色=ffffff
 前オブジェクト補正::X=0.00
 前オブジェクト補正::Y=0.00
