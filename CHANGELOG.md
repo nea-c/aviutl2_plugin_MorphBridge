@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.10 - 2026-09-23
+
+- Preserve captured A/B alpha, including semi-transparent and anti-aliased
+  edges, while the SDF continues to control morph geometry.
+- Reproduce the exact endpoint alpha at 0% and 100%; normalize intermediate
+  alpha by endpoint SDF coverage so the middle of the morph does not become a
+  simple crossfade or unintentionally thin out.
+- Use the nearer endpoint alpha during extrapolation while retaining the
+  existing extrapolated SDF geometry.
+
 ## 0.1.9 - 2026-09-23
 
 - Apply each endpoint object's scale and aspect ratio to its SDF before

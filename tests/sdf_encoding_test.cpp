@@ -1,4 +1,5 @@
 #include "render/sdf_encoding.hpp"
+#include "render/alpha_blend_shared.h"
 #include "test_support.hpp"
 
 #include <array>
@@ -50,4 +51,19 @@ void run_sdf_encoding_tests() {
   MB_CHECK(alpha_from_sdf(0.0F, 1.0F) > 0.49F);
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 0.0F, 0.0F), 12.0F, 0.0001F);
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 3.0F, 4.0F), 17.0F, 0.0001F);
+  MB_CHECK_NEAR(
+      MorphPreservedAlpha(0.25F, 0.75F, 0.0F, 0.6F, 0.0F, 0.0F),
+      0.25F, 0.0001F);
+  MB_CHECK_NEAR(
+      MorphPreservedAlpha(0.25F, 0.75F, 0.8F, 0.0F, 0.0F, 1.0F),
+      0.75F, 0.0001F);
+  MB_CHECK_NEAR(
+      MorphPreservedAlpha(0.5F, 0.0F, 1.0F, 0.0F, 1.0F, 0.5F),
+      0.5F, 0.0001F);
+  MB_CHECK_NEAR(
+      MorphPreservedAlpha(0.25F, 0.3F, 0.8F, 0.6F, 0.2F, 1.25F),
+      0.1F, 0.0001F);
+  MB_CHECK_NEAR(
+      MorphPreservedAlpha(0.4F, 0.75F, 0.8F, 0.6F, 0.2F, -0.25F),
+      0.1F, 0.0001F);
 }

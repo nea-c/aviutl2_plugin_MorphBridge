@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(MorphBridge VERSION 0.1.9 LANGUAGES CXX)
+project(MorphBridge VERSION 0.1.10 LANGUAGES CXX)
 
 include(cmake/PlatformGuard.cmake)
 morph_bridge_require_windows_x64("${WIN32}" "${CMAKE_SIZEOF_VOID_P}")
@@ -58,6 +58,7 @@ foreach(shader IN ITEMS seed jump_flood finalize morph)
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${shader}.hlsl"
       "${CMAKE_CURRENT_SOURCE_DIR}/src/render/sdf_constants_shared.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/render/alpha_blend_shared.h"
     VERBATIM)
   list(APPEND MORPH_BRIDGE_SHADER_OUTPUTS "${shader_output}")
 endforeach()

@@ -260,8 +260,9 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
       before_row1,
       after_row0,
       after_row1};
-  std::array<LPCWSTR, 2> sdf_resources{
-      before_plan->final_sdf.c_str(), after_plan->final_sdf.c_str()};
+  std::array<LPCWSTR, 4> sdf_resources{
+      before_plan->final_sdf.c_str(), after_plan->final_sdf.c_str(),
+      before_plan->upload.c_str(), after_plan->upload.c_str()};
   if (!video.exec_pixelshader_data(
           shaders::morph_cso, static_cast<int>(shaders::morph_cso_size),
           L"object", sdf_resources.data(), static_cast<int>(sdf_resources.size()),

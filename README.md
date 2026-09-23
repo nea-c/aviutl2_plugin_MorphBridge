@@ -21,8 +21,9 @@ no automatic-progress switch.
 ## Controls
 
 - `進捗`: silhouette interpolation, including values outside 0–100.
-- `色`: solid output color.
-- `しきい値`: converts the captured alpha into a silhouette.
+- `色`: solid output color. The captured A/B alpha is retained as output opacity.
+- `しきい値`: defines the SDF silhouette geometry from the captured alpha; it
+  does not discard the original alpha used for final rendering.
 - `前オブジェクト補正` / `後オブジェクト補正`: image-centered X, Y,
   scale, rotation, and aspect tracks. The previous-object correction is weighted
   by Progress; the next-object correction is weighted by one minus Progress.
@@ -78,8 +79,9 @@ cmake --build --preset release --target package
 
 ## v1 limitations
 
-- Output is a single solid-color silhouette; source texture/color blending is
-  not included.
+- Output is a single solid-color silhouette. Captured alpha, including
+  semi-transparent and anti-aliased edges, is retained; source RGB/texture
+  blending is not included.
 - A and B must be image-producing objects on the same layer around MorphBridge.
 - Endpoint capture is not started during file output. Prepare the cache once in
   the editor before final output.
