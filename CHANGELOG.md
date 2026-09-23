@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.16 - 2026-09-23
+
+- Reconstruct the 50% alpha contour as connected Marching Squares segments
+  instead of isolated threshold-crossing points, improving signed-distance
+  accuracy around straight edges and sharp corners throughout the morph.
+- Seed jump flooding with contour cells directly so segment reconstruction
+  does not require a higher-resolution SDF or additional GPU resources.
+- Remove the v0.1.15 local coverage-distance override, which matched total
+  coverage but did not improve sharp-corner fidelity.
+
 ## 0.1.15 - 2026-09-23
 
 - Reconstruct subpixel SDF distances from captured edge coverage near the

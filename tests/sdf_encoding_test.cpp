@@ -8,10 +8,13 @@
 
 using morph_bridge::SeedCoordinate;
 using morph_bridge::alpha_from_sdf;
+using morph_bridge::distance_to_contour_segment;
 using morph_bridge::extend_sdf_distance;
 using morph_bridge::inside;
 using morph_bridge::interpolate_sdf;
 using morph_bridge::mask_sample_inside;
+using morph_bridge::marching_squares_pair_first_adjacent;
+using morph_bridge::marching_squares_cell_has_contour;
 using morph_bridge::signed_sdf_distance_from_seed;
 using morph_bridge::signed_sdf_distance_to_contour;
 using morph_bridge::stabilize_extrapolated_sdf;
@@ -58,21 +61,6 @@ void run_sdf_encoding_tests() {
   MB_CHECK_NEAR(alpha_from_sdf(0.25F, 1.0F), 0.15625F, 0.0001F);
   MB_CHECK_NEAR(alpha_from_sdf(-0.25F, 1.0F), 0.84375F, 0.0001F);
   MB_CHECK_NEAR(
-      SdfDistanceFromCoverage(0.4F, 0.15625F, 1.0F, 1.5F),
-      0.25F, 0.0001F);
-  MB_CHECK_NEAR(
-      SdfDistanceFromCoverage(-0.4F, 0.84375F, 1.0F, 1.5F),
-      -0.25F, 0.0001F);
-  MB_CHECK_NEAR(
-      SdfDistanceFromCoverage(0.4F, 0.5F, 1.0F, 1.5F),
-      0.0F, 0.0001F);
-  MB_CHECK_NEAR(
-      SdfDistanceFromCoverage(2.0F, 0.25F, 1.0F, 1.5F),
-      2.0F, 0.0001F);
-  MB_CHECK_NEAR(
-      SdfDistanceFromCoverage(-0.4F, 1.0F, 1.0F, 1.5F),
-      -0.4F, 0.0001F);
-  MB_CHECK_NEAR(
       signed_sdf_distance_from_seed(0.0F, false, 64.0F),
       0.5F, 0.0001F);
   MB_CHECK_NEAR(
@@ -98,6 +86,22 @@ void run_sdf_encoding_tests() {
   MB_CHECK_NEAR(
       signed_sdf_distance_to_contour(0.3F, 0.4F, true, 64.0F),
       -0.5F, 0.0001F);
+  MB_CHECK_NEAR(
+      distance_to_contour_segment(
+          0.5F, 0.25F, 0.0F, 0.0F, 1.0F, 0.0F),
+      0.25F, 0.0001F);
+  MB_CHECK_NEAR(
+      distance_to_contour_segment(
+          2.0F, 1.0F, 0.0F, 0.0F, 1.0F, 0.0F),
+      std::sqrt(2.0F), 0.0001F);
+  MB_CHECK(marching_squares_pair_first_adjacent(true, true));
+  MB_CHECK(!marching_squares_pair_first_adjacent(true, false));
+  MB_CHECK(!marching_squares_pair_first_adjacent(false, true));
+  MB_CHECK(marching_squares_pair_first_adjacent(false, false));
+  MB_CHECK(!marching_squares_cell_has_contour(false, false, false, false));
+  MB_CHECK(!marching_squares_cell_has_contour(true, true, true, true));
+  MB_CHECK(marching_squares_cell_has_contour(true, true, false, false));
+  MB_CHECK(marching_squares_cell_has_contour(true, false, true, false));
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 0.0F, 0.0F), 12.0F, 0.0001F);
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 3.0F, 4.0F), 17.0F, 0.0001F);
 }

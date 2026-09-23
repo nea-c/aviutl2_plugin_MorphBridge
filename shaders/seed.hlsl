@@ -18,21 +18,33 @@ float4 EncodeSeed(uint2 coordinate) {
       ((coordinate.y >> 8u) & 255u) / 255.0);
 }
 
+bool SourceInBounds(int2 pixel) {
+  return pixel.x >= 0 && pixel.y >= 0 &&
+      pixel.x < int(Width) && pixel.y < int(Height);
+}
+
+float SourceAlpha(int2 pixel) {
+  return SourceInBounds(pixel)
+      ? Source.Load(int3(pixel, 0)).a
+      : 0.0;
+}
+
 [numthreads(8, 8, 1)]
 void main(uint3 dispatch_id : SV_DispatchThreadID) {
   const uint2 pixel = dispatch_id.xy;
   if (pixel.x >= Width || pixel.y >= Height) return;
-  const bool center_inside = Source.Load(int3(pixel, 0)).a >= AlphaThreshold;
-  bool boundary = false;
-  const int2 offsets[4] = {int2(-1, 0), int2(1, 0), int2(0, -1), int2(0, 1)};
+  const int2 corners[4] = {
+      int2(pixel),
+      int2(pixel) + int2(1, 0),
+      int2(pixel) + int2(1, 1),
+      int2(pixel) + int2(0, 1)};
+  bool inside[4];
   [unroll]
-  for (int index = 0; index < 4; ++index) {
-    const int2 neighbor = int2(pixel) + offsets[index];
-    const bool neighbor_inside = neighbor.x >= 0 && neighbor.y >= 0 &&
-        neighbor.x < int(Width) && neighbor.y < int(Height)
-        ? Source.Load(int3(neighbor, 0)).a >= AlphaThreshold
-        : false;
-    boundary = boundary || (neighbor_inside != center_inside);
+  for (int corner = 0; corner < 4; ++corner) {
+    inside[corner] = SourceInBounds(corners[corner]) &&
+        SourceAlpha(corners[corner]) >= AlphaThreshold;
   }
+  const bool boundary = MarchingSquaresCellHasContour(
+      inside[0], inside[1], inside[2], inside[3]);
   Target[pixel] = boundary ? EncodeSeed(pixel) : 1.0.xxxx;
 }
