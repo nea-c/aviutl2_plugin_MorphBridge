@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.19 - 2026-09-23
+
+- Reject adjacent MorphBridge objects as A/B endpoints before capture,
+  preventing recursive object rendering while a MorphBridge is being split.
+
 ## 0.1.18 - 2026-09-23
 
 - Return the captured A or B image directly at exactly 0% or 100%, preserving

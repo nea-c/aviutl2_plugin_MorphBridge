@@ -100,6 +100,7 @@ ObjectSpan span_for(EDIT_SECTION& edit, OBJECT_HANDLE object, const ObjectSpan& 
 std::optional<EndpointPair> find_endpoints(FILTER_PROC_VIDEO& video) {
   if (video.edit == nullptr || video.object == nullptr ||
       video.edit->find_object == nullptr ||
+      video.edit->count_object_effect == nullptr ||
       video.edit->get_object_layer_frame == nullptr) {
     return std::nullopt;
   }
@@ -109,6 +110,9 @@ std::optional<EndpointPair> find_endpoints(FILTER_PROC_VIDEO& video) {
   return resolve_neighbors(bridge, [&](const int layer, const int frame) {
     const auto object = video.edit->find_object(layer, frame);
     if (object == nullptr) {
+      return std::optional<ObjectSpan>{};
+    }
+    if (video.edit->count_object_effect(object, L"MorphBridge") > 0) {
       return std::optional<ObjectSpan>{};
     }
     return std::optional<ObjectSpan>{span_for(*video.edit, object, bridge)};
