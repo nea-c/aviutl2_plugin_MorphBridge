@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.15 - 2026-09-23
+
+- Reconstruct subpixel SDF distances from captured edge coverage near the
+  contour, retaining more of the source antialiasing and sharp-corner detail
+  throughout the morph without treating faint alpha as solid geometry.
+
 ## 0.1.14 - 2026-09-23
 
 - Slightly widen SDF antialiasing to better match the captured source edge.

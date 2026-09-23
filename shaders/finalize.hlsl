@@ -1,4 +1,5 @@
 #include "render/sdf_constants_shared.h"
+#include "render/sdf_coverage_shared.h"
 
 Texture2D<float4> Seeds : register(t0);
 Texture2D<float4> Mask : register(t1);
@@ -135,8 +136,13 @@ void main(uint3 dispatch_id : SV_DispatchThreadID) {
   if (pixel.x >= Width || pixel.y >= Height) return;
   const bool is_inside =
       Mask.Load(int3(pixel, 0)).a >= AlphaThreshold;
-  const float distance = DistanceToNearestContour(
+  const float geometric_distance = DistanceToNearestContour(
       pixel, AlphaThreshold, is_inside);
+  const float distance = SdfDistanceFromCoverage(
+      geometric_distance,
+      Mask.Load(int3(pixel, 0)).a,
+      1.05,
+      1.5);
   const uint encoded = uint(round(saturate(distance / MaximumDistance * 0.5 + 0.5) * 65535.0));
   Target[pixel] = float4(
       (encoded & 255u) / 255.0,

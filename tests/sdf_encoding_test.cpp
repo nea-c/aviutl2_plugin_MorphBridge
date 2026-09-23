@@ -58,6 +58,21 @@ void run_sdf_encoding_tests() {
   MB_CHECK_NEAR(alpha_from_sdf(0.25F, 1.0F), 0.15625F, 0.0001F);
   MB_CHECK_NEAR(alpha_from_sdf(-0.25F, 1.0F), 0.84375F, 0.0001F);
   MB_CHECK_NEAR(
+      SdfDistanceFromCoverage(0.4F, 0.15625F, 1.0F, 1.5F),
+      0.25F, 0.0001F);
+  MB_CHECK_NEAR(
+      SdfDistanceFromCoverage(-0.4F, 0.84375F, 1.0F, 1.5F),
+      -0.25F, 0.0001F);
+  MB_CHECK_NEAR(
+      SdfDistanceFromCoverage(0.4F, 0.5F, 1.0F, 1.5F),
+      0.0F, 0.0001F);
+  MB_CHECK_NEAR(
+      SdfDistanceFromCoverage(2.0F, 0.25F, 1.0F, 1.5F),
+      2.0F, 0.0001F);
+  MB_CHECK_NEAR(
+      SdfDistanceFromCoverage(-0.4F, 1.0F, 1.0F, 1.5F),
+      -0.4F, 0.0001F);
+  MB_CHECK_NEAR(
       signed_sdf_distance_from_seed(0.0F, false, 64.0F),
       0.5F, 0.0001F);
   MB_CHECK_NEAR(
