@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.14 - 2026-09-23
+
+- Slightly widen SDF antialiasing to better match the captured source edge.
+
 ## 0.1.13 - 2026-09-23
 
 - Align SDF sampling to the captured image pixel phase, removing the half-pixel
