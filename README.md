@@ -22,17 +22,16 @@ no automatic-progress switch.
 
 - `進捗`: silhouette interpolation, including values outside 0–100.
 - `色`: solid output color.
-- `しきい値`: defines the SDF silhouette geometry from the captured alpha.
 - `前オブジェクト補正` / `後オブジェクト補正`: image-centered X, Y,
   scale, rotation, and aspect tracks. The previous-object correction is weighted
   by Progress; the next-object correction is weighted by one minus Progress.
   These tracks affect SDF sampling only and extrapolate with Progress. Scale is
   an absolute percentage where 100 means no correction.
 
-The SDF is always generated at 100% working resolution.
-Alpha values around the threshold are used only to estimate the subpixel
-position of the silhouette boundary. They do not make the output silhouette
-partially transparent.
+The SDF is always generated at 100% working resolution, with its silhouette
+boundary fixed at 50% captured alpha. Alpha values around that boundary are
+used only to estimate the subpixel position of the silhouette boundary. They do
+not make the output silhouette partially transparent.
 
 The endpoint position, center, rotation, scale/aspect, and opacity are read at
 the endpoint frames automatically. Scale and aspect are applied independently
@@ -43,7 +42,7 @@ and opacity remain output-object transforms; rotation uses the shortest path.
 
 `UPDATE_OBJECT` marks the project generation as changed. On the next render,
 MorphBridge compares the complete A/B aliases, endpoint frames, scene size,
-alpha threshold, fixed SDF resolution, cache format, and edit generation. It
+fixed SDF resolution, cache format, and edit generation. It
 captures again when either the signature or generation changes. Rapid edits are
 coalesced and stale asynchronous results are discarded. CPU endpoint images are
 retained, while transient GPU SDF resources are reconstructed before each draw

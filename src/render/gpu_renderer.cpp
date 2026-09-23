@@ -240,7 +240,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   }
   create_endpoint_resources(video, *before_plan);
   create_endpoint_resources(video, *after_plan);
-  const float threshold = std::clamp(request.alpha_threshold, 0.0F, 1.0F);
+  constexpr float threshold = 0.5F;
   if (!build_endpoint_sdf(video, *before_plan, threshold, maximum_distance) ||
       !build_endpoint_sdf(video, *after_plan, threshold, maximum_distance)) {
     return {RenderError::ComputeFailed, true};

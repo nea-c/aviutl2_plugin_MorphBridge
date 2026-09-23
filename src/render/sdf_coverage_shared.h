@@ -13,6 +13,12 @@ static float SdfCoverageSaturate(const float value) {
 }
 #endif
 
+static inline float SdfPixelCoordinate(const float transformed_coordinate) {
+  // AviUtl2 places the rendered media image half a pixel before the captured
+  // resource phase. Sampling half a source pixel earlier cancels that offset.
+  return transformed_coordinate - 1.0F;
+}
+
 static inline float SdfAntialiasCoverage(
     const float distance,
     const float transition_width) {

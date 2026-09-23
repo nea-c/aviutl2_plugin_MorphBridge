@@ -88,7 +88,7 @@ void run_plugin_registration_tests() {
   MB_CHECK(has_before_corrections);
   MB_CHECK(has_after_corrections);
   MB_CHECK(value_item_names.contains(L"色"));
-  MB_CHECK(value_item_names.contains(L"しきい値"));
+  MB_CHECK(!value_item_names.contains(L"しきい値"));
   MB_CHECK(value_item_names.contains(L"前オブジェクト補正::X"));
   MB_CHECK(value_item_names.contains(L"前オブジェクト補正::Y"));
   MB_CHECK(value_item_names.contains(L"前オブジェクト補正::拡大率"));
@@ -108,7 +108,6 @@ void run_plugin_registration_tests() {
     MB_CHECK(track->e == maximum);
     MB_CHECK(track->step == step);
   };
-  check_track(L"しきい値", 50.0, 0.0, 100.0, 0.01);
   check_track(L"前オブジェクト補正::X", 0.0, -100000.0, 100000.0, 0.01);
   check_track(L"前オブジェクト補正::Y", 0.0, -100000.0, 100000.0, 0.01);
   check_track(L"前オブジェクト補正::拡大率", 100.0, 0.0, 10000.0, 0.001);
@@ -120,7 +119,7 @@ void run_plugin_registration_tests() {
   check_track(L"後オブジェクト補正::回転", 0.0, -3600.0, 3600.0, 0.01);
   check_track(L"後オブジェクト補正::縦横比", 0.0, -100.0, 100.0, 0.001);
   MB_CHECK(!value_item_names.contains(L"SDF scale"));
-  MB_CHECK(item_count == 17);
+  MB_CHECK(item_count == 16);
   MB_CHECK(registered_filter->func_create != nullptr);
   MB_CHECK(registered_filter->func_destroy != nullptr);
 }

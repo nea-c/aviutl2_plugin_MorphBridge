@@ -124,7 +124,6 @@ GpuRenderRequest request(FILTER_PROC_VIDEO& video, const PreparedEndpoints& imag
   value.signature = {1, 2};
   value.cache_generation = 7;
   value.progress = 1.25F;
-  value.alpha_threshold = 0.5F;
   value.extrapolation_limit = 32.0F;
   value.color = {1.0F, 0.5F, 0.25F, 1.0F};
   value.before_sampling = {5.0F, -10.0F, 0.0F, 2.0F, 0.5F, 100.0F, 50.0F};

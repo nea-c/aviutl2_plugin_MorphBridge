@@ -39,7 +39,9 @@ float SampleDistance(Texture2D<float4> field, float2 transformed) {
   uint width;
   uint height;
   field.GetDimensions(width, height);
-  const float2 pixel_position = transformed - 0.5;
+  const float2 pixel_position = float2(
+      SdfPixelCoordinate(transformed.x),
+      SdfPixelCoordinate(transformed.y));
   const float2 clamped_position = clamp(
       pixel_position, float2(0.0, 0.0), float2(width - 1u, height - 1u));
   const int2 base = int2(floor(clamped_position));

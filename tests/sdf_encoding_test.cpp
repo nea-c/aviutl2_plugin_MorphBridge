@@ -1,4 +1,5 @@
 #include "render/sdf_encoding.hpp"
+#include "render/sdf_coverage_shared.h"
 #include "test_support.hpp"
 
 #include <array>
@@ -21,6 +22,8 @@ using morph_bridge::unpack_seed;
 using morph_bridge::unpack_signed_distance;
 
 void run_sdf_encoding_tests() {
+  MB_CHECK_NEAR(SdfPixelCoordinate(0.5F), -0.5F, 0.0001F);
+  MB_CHECK_NEAR(SdfPixelCoordinate(1.5F), 0.5F, 0.0001F);
   for (const std::uint16_t value : std::array<std::uint16_t, 5>{0, 1, 255, 256, 4095}) {
     const auto decoded = unpack_seed(pack_seed(value, value));
     MB_CHECK(decoded.has_value());

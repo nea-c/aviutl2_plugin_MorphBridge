@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.13 - 2026-09-23
+
+- Align SDF sampling to the captured image pixel phase, removing the half-pixel
+  endpoint offset that made otherwise identical silhouettes look different.
+- Fix the silhouette threshold at 50% and remove the `しきい値` control.
+- Continue using captured alpha only for subpixel contour geometry, not output
+  opacity.
+
 ## 0.1.12 - 2026-09-23
 
 - Locate SDF boundaries at subpixel threshold crossings between captured
