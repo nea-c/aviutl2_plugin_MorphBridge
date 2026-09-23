@@ -10,8 +10,11 @@ using morph_bridge::alpha_from_sdf;
 using morph_bridge::extend_sdf_distance;
 using morph_bridge::inside;
 using morph_bridge::interpolate_sdf;
+using morph_bridge::mask_sample_inside;
 using morph_bridge::signed_sdf_distance_from_seed;
+using morph_bridge::signed_sdf_distance_to_contour;
 using morph_bridge::stabilize_extrapolated_sdf;
+using morph_bridge::threshold_crossing_fraction;
 using morph_bridge::pack_seed;
 using morph_bridge::pack_signed_distance;
 using morph_bridge::unpack_seed;
@@ -60,6 +63,23 @@ void run_sdf_encoding_tests() {
   MB_CHECK_NEAR(
       signed_sdf_distance_from_seed(64.0F, true, 64.0F),
       -64.0F, 0.0001F);
+  MB_CHECK_NEAR(
+      threshold_crossing_fraction(1.0F, 0.0F, 0.5F),
+      0.5F, 0.0001F);
+  MB_CHECK_NEAR(
+      threshold_crossing_fraction(0.6F, 0.0F, 0.5F),
+      1.0F / 6.0F, 0.0001F);
+  MB_CHECK_NEAR(
+      threshold_crossing_fraction(0.0F, 0.6F, 0.5F),
+      5.0F / 6.0F, 0.0001F);
+  MB_CHECK(mask_sample_inside(0.0F, 0.0F, true));
+  MB_CHECK(!mask_sample_inside(0.0F, 0.0F, false));
+  MB_CHECK_NEAR(
+      signed_sdf_distance_to_contour(0.3F, 0.4F, false, 64.0F),
+      0.5F, 0.0001F);
+  MB_CHECK_NEAR(
+      signed_sdf_distance_to_contour(0.3F, 0.4F, true, 64.0F),
+      -0.5F, 0.0001F);
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 0.0F, 0.0F), 12.0F, 0.0001F);
   MB_CHECK_NEAR(extend_sdf_distance(12.0F, 3.0F, 4.0F), 17.0F, 0.0001F);
 }

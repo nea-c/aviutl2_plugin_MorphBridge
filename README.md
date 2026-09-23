@@ -30,6 +30,9 @@ no automatic-progress switch.
   an absolute percentage where 100 means no correction.
 
 The SDF is always generated at 100% working resolution.
+Alpha values around the threshold are used only to estimate the subpixel
+position of the silhouette boundary. They do not make the output silhouette
+partially transparent.
 
 The endpoint position, center, rotation, scale/aspect, and opacity are read at
 the endpoint frames automatically. Scale and aspect are applied independently

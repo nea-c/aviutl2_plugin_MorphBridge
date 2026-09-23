@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.12 - 2026-09-23
+
+- Locate SDF boundaries at subpixel threshold crossings between captured
+  alpha samples instead of snapping every contour to pixel centers.
+- Refine each JFA result against the unique seeds found in its 3x3
+  neighborhood so corners and equally distant seed choices use the nearest
+  subpixel contour rather than merely the nearest seed center.
+- Preserve solid silhouette output while using source alpha only to refine
+  contour geometry, improving diagonal edges and endpoint fidelity without
+  restoring partial-alpha blending.
+
 ## 0.1.11 - 2026-09-23
 
 - Generate anti-aliasing from the final morphed SDF using its screen-space
