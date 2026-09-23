@@ -1,4 +1,5 @@
 #include "render/sdf_encoding.hpp"
+#include "render/sdf_coverage_shared.h"
 #include "render/sdf_constants_shared.h"
 
 #include <algorithm>
@@ -84,10 +85,7 @@ bool inside(const float distance) {
 }
 
 float alpha_from_sdf(const float distance, const float feather_width) {
-  if (!(feather_width > 0.0F)) {
-    return inside(distance) ? 1.0F : 0.0F;
-  }
-  return std::clamp(0.5F - distance / feather_width, 0.0F, 1.0F);
+  return SdfAntialiasCoverage(distance, feather_width);
 }
 
 }  // namespace morph_bridge

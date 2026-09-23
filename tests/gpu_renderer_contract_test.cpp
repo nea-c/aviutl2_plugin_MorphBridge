@@ -161,11 +161,9 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(cold.calls[cold.calls.size() - 1] == L"pixel:object");
   MB_CHECK(cold.upload_count == 2);
   MB_CHECK(created_resources.size() == 8);
-  MB_CHECK(cold.pixel_sources.size() == 4);
+  MB_CHECK(cold.pixel_sources.size() == 2);
   MB_CHECK(cold.pixel_sources[0] == first.before.final_sdf);
   MB_CHECK(cold.pixel_sources[1] == first.after.final_sdf);
-  MB_CHECK(cold.pixel_sources[2] == first.before.upload);
-  MB_CHECK(cold.pixel_sources[3] == first.after.upload);
   MB_CHECK_NEAR(captured_constants.progress, 1.25F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.extrapolation_limit, 32.0F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[0], 0.5F, 0.0001F);

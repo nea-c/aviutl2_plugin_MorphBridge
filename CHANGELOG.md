@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.11 - 2026-09-23
+
+- Generate anti-aliasing from the final morphed SDF using its screen-space
+  derivative, keeping the edge width stable through scale and aspect changes.
+- Reconstruct a continuous distance field with bilinear SDF sampling before
+  measuring that derivative, including corrected and rotated endpoints.
+- Center the SDF zero crossing between inside and outside boundary pixels,
+  preventing a half-transparent zero-distance band from growing when scaled up.
+- Use a smooth cubic coverage curve instead of the previous fixed-width linear
+  ramp.
+- Remove source partial-alpha blending; the threshold defines geometry and the
+  resulting silhouette remains solid apart from its generated anti-aliased edge.
+
 ## 0.1.10 - 2026-09-23
 
 - Preserve captured A/B alpha, including semi-transparent and anti-aliased

@@ -21,11 +21,13 @@ void main(uint3 dispatch_id : SV_DispatchThreadID) {
   const uint2 pixel = dispatch_id.xy;
   if (pixel.x >= Width || pixel.y >= Height) return;
   const uint2 seed = DecodeSeed(Seeds.Load(int3(pixel, 0)));
-  float distance = MaximumDistance;
+  const bool is_inside =
+      Mask.Load(int3(pixel, 0)).a >= AlphaThreshold;
+  float distance = is_inside ? -MaximumDistance : MaximumDistance;
   if (seed.x != MB_SDF_INVALID_COORDINATE && seed.y != MB_SDF_INVALID_COORDINATE) {
-    distance = min(length(float2(seed) - float2(pixel)), MaximumDistance);
+    distance = SignedSdfDistanceFromSeed(
+        length(float2(seed) - float2(pixel)), is_inside, MaximumDistance);
   }
-  if (Mask.Load(int3(pixel, 0)).a >= AlphaThreshold) distance = -distance;
   const uint encoded = uint(round(saturate(distance / MaximumDistance * 0.5 + 0.5) * 65535.0));
   Target[pixel] = float4(
       (encoded & 255u) / 255.0,

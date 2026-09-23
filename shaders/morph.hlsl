@@ -1,10 +1,8 @@
 #include "render/sdf_constants_shared.h"
-#include "render/alpha_blend_shared.h"
+#include "render/sdf_coverage_shared.h"
 
 Texture2D<float4> BeforeSdf : register(t0);
 Texture2D<float4> AfterSdf : register(t1);
-Texture2D<float4> BeforeImage : register(t2);
-Texture2D<float4> AfterImage : register(t3);
 
 cbuffer MorphConstants : register(b0) {
   float4 SolidColor;
@@ -32,38 +30,30 @@ float2 TransformPosition(float2 sample_position, float4 row0, float4 row1) {
       dot(float3(sample_position, 1.0), row1.xyz));
 }
 
+float LoadDistance(Texture2D<float4> field, int2 pixel, uint width, uint height) {
+  const int2 clamped = clamp(pixel, int2(0, 0), int2(width - 1u, height - 1u));
+  return DecodeDistance(field.Load(int3(clamped, 0)));
+}
+
 float SampleDistance(Texture2D<float4> field, float2 transformed) {
   uint width;
   uint height;
   field.GetDimensions(width, height);
-  const float2 clamped = clamp(
-      transformed, float2(0.0, 0.0), float2(width - 1u, height - 1u));
-  const float border_distance = DecodeDistance(field.Load(int3(int2(clamped), 0)));
-  const float2 outside_offset = transformed - clamped;
-  return ExtendSdfDistance(border_distance, outside_offset.x, outside_offset.y);
-}
-
-float LoadAlpha(Texture2D<float4> field, int2 pixel, uint width, uint height) {
-  if (any(pixel < int2(0, 0)) || any(pixel >= int2(width, height))) {
-    return 0.0;
-  }
-  return field.Load(int3(pixel, 0)).a;
-}
-
-float SampleAlpha(Texture2D<float4> field, float2 transformed) {
-  uint width;
-  uint height;
-  field.GetDimensions(width, height);
   const float2 pixel_position = transformed - 0.5;
-  const int2 base = int2(floor(pixel_position));
-  const float2 fraction = frac(pixel_position);
+  const float2 clamped_position = clamp(
+      pixel_position, float2(0.0, 0.0), float2(width - 1u, height - 1u));
+  const int2 base = int2(floor(clamped_position));
+  const float2 fraction = frac(clamped_position);
   const float top = lerp(
-      LoadAlpha(field, base, width, height),
-      LoadAlpha(field, base + int2(1, 0), width, height), fraction.x);
+      LoadDistance(field, base, width, height),
+      LoadDistance(field, base + int2(1, 0), width, height), fraction.x);
   const float bottom = lerp(
-      LoadAlpha(field, base + int2(0, 1), width, height),
-      LoadAlpha(field, base + int2(1, 1), width, height), fraction.x);
-  return lerp(top, bottom, fraction.y);
+      LoadDistance(field, base + int2(0, 1), width, height),
+      LoadDistance(field, base + int2(1, 1), width, height), fraction.x);
+  const float border_distance = lerp(top, bottom, fraction.y);
+  const float2 outside_offset = pixel_position - clamped_position;
+  return ExtendSdfDistance(
+      border_distance, outside_offset.x, outside_offset.y);
 }
 
 float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
@@ -79,13 +69,9 @@ float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
   } else if (Progress > 1.0) {
     distance = max(distance, after - ExtrapolationLimit);
   }
-  const float feather = max(FeatherWidth, 0.0001);
-  const float before_coverage = saturate(0.5 - before / feather);
-  const float after_coverage = saturate(0.5 - after / feather);
-  const float morph_coverage = saturate(0.5 - distance / feather);
-  const float alpha = MorphPreservedAlpha(
-      SampleAlpha(BeforeImage, before_position),
-      SampleAlpha(AfterImage, after_position),
-      before_coverage, after_coverage, morph_coverage, Progress) * OutputOpacity;
+  const float transition_width = max(
+      fwidth(distance) * FeatherWidth, 0.0001);
+  const float alpha =
+      SdfAntialiasCoverage(distance, transition_width) * OutputOpacity;
   return float4(SolidColor.rgb * alpha, alpha);
 }
