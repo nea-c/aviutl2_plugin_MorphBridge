@@ -18,6 +18,7 @@ struct StandardTransform {
   double rz{};
   double scale{100.0};
   double aspect{};
+  double depth_scale{1.0};
   double opacity{100.0};
 };
 
@@ -35,11 +36,16 @@ struct ScaleFactors {
 };
 
 [[nodiscard]] double interpolate_angle_degrees(double before, double after, double progress);
-[[nodiscard]] double interpolate_positive_scale(double before, double after, double progress);
 [[nodiscard]] ScaleFactors scale_factors(double scale_percent, double aspect_percent);
 [[nodiscard]] StandardTransform interpolate_transform(
     const StandardTransform& before, const StandardTransform& after, double progress);
 [[nodiscard]] SamplingTransform make_sampling_transform(
+    const TransformCorrection& correction,
+    double weight,
+    float center_x,
+    float center_y);
+[[nodiscard]] SamplingTransform make_sampling_transform(
+    const StandardTransform& source,
     const TransformCorrection& correction,
     double weight,
     float center_x,

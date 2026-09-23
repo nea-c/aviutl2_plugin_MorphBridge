@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(MorphBridge VERSION 0.1.8 LANGUAGES CXX)
+project(MorphBridge VERSION 0.1.9 LANGUAGES CXX)
 
 include(cmake/PlatformGuard.cmake)
 morph_bridge_require_windows_x64("${WIN32}" "${CMAKE_SIZEOF_VOID_P}")

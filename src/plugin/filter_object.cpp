@@ -126,6 +126,7 @@ StandardTransform from_sdk_transform(const OBJECT_IMAGE_PARAM& input) {
       input.rx, input.ry, input.rz,
       sum * 50.0,
       sum > 0.0 ? (sx - sy) / sum * 100.0 : 0.0,
+      std::abs(input.sz),
       input.alpha * 100.0};
 }
 
@@ -137,7 +138,7 @@ TransformCorrection b_correction() {
   return {b_x.value, b_y.value, b_scale.value, b_aspect.value, b_rotation.value};
 }
 
-void apply_output_transform(
+std::optional<std::pair<StandardTransform, StandardTransform>> apply_output_transform(
     FILTER_PROC_VIDEO& video,
     OBJECT_HANDLE before,
     OBJECT_HANDLE after,
@@ -145,7 +146,7 @@ void apply_output_transform(
     const double amount) {
   if (video.param == nullptr || video.get_output_image_param == nullptr ||
       video.scene == nullptr || video.object == nullptr || video.scene->rate == 0) {
-    return;
+    return std::nullopt;
   }
   const int current_frame = video.object->frame_s + video.object->frame;
   const double seconds_per_frame =
@@ -158,10 +159,11 @@ void apply_output_transform(
       !video.get_output_image_param(
           after, (pair.after_frame - current_frame) * seconds_per_frame,
           &after_param, sizeof(after_param))) {
-    return;
+    return std::nullopt;
   }
-  const auto output = interpolate_transform(
-      from_sdk_transform(before_param), from_sdk_transform(after_param), amount);
+  const auto before_transform = from_sdk_transform(before_param);
+  const auto after_transform = from_sdk_transform(after_param);
+  const auto output = interpolate_transform(before_transform, after_transform, amount);
   const auto factors = scale_factors(output.scale, output.aspect);
   video.param->x = static_cast<float>(output.x);
   video.param->y = static_cast<float>(output.y);
@@ -174,8 +176,9 @@ void apply_output_transform(
   video.param->rz = static_cast<float>(output.rz);
   video.param->sx = static_cast<float>(factors.x);
   video.param->sy = static_cast<float>(factors.y);
-  video.param->sz = static_cast<float>(std::max(output.scale / 100.0, 1.0e-6));
+  video.param->sz = static_cast<float>(output.depth_scale);
   video.param->alpha = static_cast<float>(std::clamp(output.opacity / 100.0, 0.0, 1.0));
+  return std::pair{before_transform, after_transform};
 }
 
 bool process_video(FILTER_PROC_VIDEO* video) {
@@ -243,7 +246,13 @@ bool process_video(FILTER_PROC_VIDEO* video) {
   }
 
   const double amount = progress.value / 100.0;
-  apply_output_transform(*video, before, after, *pair, amount);
+  const auto endpoint_transforms =
+      apply_output_transform(*video, before, after, *pair, amount);
+  if (!endpoint_transforms) {
+    warn_once(state, L"endpoint transforms could not be read");
+    output_transparent(video);
+    return true;
+  }
   const auto prepared = state->preparation.ready();
   if (!prepared) {
     output_transparent(video);
@@ -253,8 +262,11 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
       100);
-  const auto sampling = make_sampling_transforms(
-      a_correction(), b_correction(), amount, 0.0F, 0.0F, 0.0F, 0.0F);
+  const std::pair sampling{
+      make_sampling_transform(
+          endpoint_transforms->first, a_correction(), amount, 0.0F, 0.0F),
+      make_sampling_transform(
+          endpoint_transforms->second, b_correction(), 1.0 - amount, 0.0F, 0.0F)};
   const auto canvas = envelope ? make_transformed_canvas_layout(
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,

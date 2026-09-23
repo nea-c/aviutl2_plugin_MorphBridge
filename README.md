@@ -32,8 +32,9 @@ no automatic-progress switch.
 The SDF is always generated at 100% working resolution.
 
 The endpoint position, center, rotation, scale/aspect, and opacity are read at
-the endpoint frames and interpolated automatically. Rotation uses the shortest
-path and positive scale uses geometric interpolation.
+the endpoint frames automatically. Scale and aspect are applied independently
+to the A/B SDFs before silhouette interpolation. Position, center, rotation,
+and opacity remain output-object transforms; rotation uses the shortest path.
 
 ## Cache behavior
 

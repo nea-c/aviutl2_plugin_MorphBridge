@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.9 - 2026-09-23
+
+- Apply each endpoint object's scale and aspect ratio to its SDF before
+  interpolation, so size and aspect changes participate in the silhouette morph.
+- Preserve endpoint center X/Y semantics by carrying scale-around-center movement
+  into the corresponding SDF sampling transform.
+- Keep the MorphBridge output scale and aspect neutral to avoid applying endpoint
+  scaling twice; position, rotation, center, and opacity remain interpolated as
+  output-object transforms.
+- Retain only the interpolated depth scale on the output transform so center Z
+  continues to behave correctly with X/Y rotation.
+
 ## 0.1.8 - 2026-09-23
 
 - Rename the correction groups to `前オブジェクト補正` and

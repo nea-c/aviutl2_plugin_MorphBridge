@@ -34,13 +34,6 @@ double interpolate_angle_degrees(
   return wrap_degrees(before + delta * progress);
 }
 
-double interpolate_positive_scale(
-    const double before, const double after, const double progress) {
-  const double safe_before = std::max(before, minimum_factor);
-  const double safe_after = std::max(after, minimum_factor);
-  return std::exp(lerp(std::log(safe_before), std::log(safe_after), progress));
-}
-
 ScaleFactors scale_factors(
     const double scale_percent, const double aspect_percent) {
   const double scale = std::max(scale_percent / 100.0, minimum_factor);
@@ -54,14 +47,6 @@ StandardTransform interpolate_transform(
     const StandardTransform& before,
     const StandardTransform& after,
     const double progress) {
-  const auto before_factors = scale_factors(before.scale, before.aspect);
-  const auto after_factors = scale_factors(after.scale, after.aspect);
-  const double sx = interpolate_positive_scale(
-      before_factors.x, after_factors.x, progress);
-  const double sy = interpolate_positive_scale(
-      before_factors.y, after_factors.y, progress);
-  const double factor_sum = sx + sy;
-
   StandardTransform result;
   result.x = lerp(before.x, after.x, progress);
   result.y = lerp(before.y, after.y, progress);
@@ -72,8 +57,10 @@ StandardTransform interpolate_transform(
   result.rx = interpolate_angle_degrees(before.rx, after.rx, progress);
   result.ry = interpolate_angle_degrees(before.ry, after.ry, progress);
   result.rz = interpolate_angle_degrees(before.rz, after.rz, progress);
-  result.scale = factor_sum * 50.0;
-  result.aspect = factor_sum > 0.0 ? (sx - sy) / factor_sum * 100.0 : 0.0;
+  const double before_depth = std::max(std::abs(before.depth_scale), minimum_factor);
+  const double after_depth = std::max(std::abs(after.depth_scale), minimum_factor);
+  result.depth_scale = std::exp(
+      lerp(std::log(before_depth), std::log(after_depth), progress));
   result.opacity = lerp(before.opacity, after.opacity, progress);
   return result;
 }
@@ -93,6 +80,29 @@ SamplingTransform make_sampling_transform(
   result.sy = static_cast<float>(scale * (1.0 - aspect));
   result.cx = center_x;
   result.cy = center_y;
+  return result;
+}
+
+SamplingTransform make_sampling_transform(
+    const StandardTransform& source,
+    const TransformCorrection& correction,
+    const double weight,
+    const float center_x,
+    const float center_y) {
+  auto result = make_sampling_transform(correction, weight, center_x, center_y);
+  const auto source_scale = scale_factors(source.scale, source.aspect);
+  const double pivot_x = (1.0 - source_scale.x) * source.cx;
+  const double pivot_y = (1.0 - source_scale.y) * source.cy;
+  constexpr double pi = 3.14159265358979323846;
+  const double radians = result.rotation * pi / 180.0;
+  const double cosine = std::cos(radians);
+  const double sine = std::sin(radians);
+  result.tx += static_cast<float>(
+      cosine * result.sx * pivot_x - sine * result.sy * pivot_y);
+  result.ty += static_cast<float>(
+      sine * result.sx * pivot_x + cosine * result.sy * pivot_y);
+  result.sx *= static_cast<float>(source_scale.x);
+  result.sy *= static_cast<float>(source_scale.y);
   return result;
 }
 
