@@ -92,6 +92,6 @@ void run_standard_transform_tests() {
   after_correction.x = 20.0;
   const auto pair = make_sampling_transforms(
       correction, after_correction, 1.25, 100.0F, 50.0F, 80.0F, 40.0F);
-  MB_CHECK_NEAR(pair.first.tx, 12.5F, 0.0001F);
-  MB_CHECK_NEAR(pair.second.tx, -5.0F, 0.0001F);
+  MB_CHECK_NEAR(pair.first.tx, -2.5F, 0.0001F);
+  MB_CHECK_NEAR(pair.second.tx, 25.0F, 0.0001F);
 }

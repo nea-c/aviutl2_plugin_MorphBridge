@@ -167,16 +167,32 @@ std::optional<std::pair<StandardTransform, StandardTransform>> apply_output_tran
   const auto before_transform = from_sdk_transform(before_param);
   const auto after_transform = from_sdk_transform(after_param);
   const auto output = interpolate_transform(before_transform, after_transform, amount);
-  const auto factors = scale_factors(output.scale, output.aspect);
-  video.param->x = static_cast<float>(output.x);
-  video.param->y = static_cast<float>(output.y);
+  auto factors = scale_factors(output.scale, output.aspect);
+  double correction_x = 0.0;
+  double correction_y = 0.0;
+  double correction_rotation = 0.0;
+  // Exact endpoint frames bypass the SDF sampler, so their transform must
+  // be applied to the raw endpoint image through the host output parameters.
+  if (amount == 0.0 || amount == 1.0) {
+    const auto& source = amount == 0.0 ? before_transform : after_transform;
+    const auto correction = amount == 0.0 ? a_correction() : b_correction();
+    const auto source_factors = scale_factors(source.scale, source.aspect);
+    const auto correction_factors = scale_factors(correction.scale, correction.aspect);
+    factors.x = source_factors.x * correction_factors.x;
+    factors.y = source_factors.y * correction_factors.y;
+    correction_x = correction.x;
+    correction_y = correction.y;
+    correction_rotation = correction.rotation;
+  }
+  video.param->x = static_cast<float>(output.x + correction_x);
+  video.param->y = static_cast<float>(output.y + correction_y);
   video.param->z = static_cast<float>(output.z);
   video.param->cx = static_cast<float>(output.cx);
   video.param->cy = static_cast<float>(output.cy);
   video.param->cz = static_cast<float>(output.cz);
   video.param->rx = static_cast<float>(output.rx);
   video.param->ry = static_cast<float>(output.ry);
-  video.param->rz = static_cast<float>(output.rz);
+  video.param->rz = static_cast<float>(output.rz + correction_rotation);
   video.param->sx = static_cast<float>(factors.x);
   video.param->sy = static_cast<float>(factors.y);
   video.param->sz = static_cast<float>(output.depth_scale);
@@ -266,9 +282,9 @@ bool process_video(FILTER_PROC_VIDEO* video) {
       100);
   const std::pair sampling{
       make_sampling_transform(
-          endpoint_transforms->first, a_correction(), amount, 0.0F, 0.0F),
+          endpoint_transforms->first, a_correction(), 1.0 - amount, 0.0F, 0.0F),
       make_sampling_transform(
-          endpoint_transforms->second, b_correction(), 1.0 - amount, 0.0F, 0.0F)};
+          endpoint_transforms->second, b_correction(), amount, 0.0F, 0.0F)};
   const auto canvas = envelope ? make_transformed_canvas_layout(
       prepared->before.width, prepared->before.height,
       prepared->after.width, prepared->after.height,
