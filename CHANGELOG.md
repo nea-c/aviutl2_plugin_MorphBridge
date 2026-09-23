@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.18 - 2026-09-23
+
+- Return the captured A or B image directly at exactly 0% or 100%, preserving
+  its original dimensions, edge coverage, and pixels at the morph endpoints.
+- Tune the intermediate SDF antialiasing width from 1.14 to 1.115 pixels based
+  on measured source/output error while leaving the zero contour unchanged.
+
 ## 0.1.17 - 2026-09-23
 
 - Widen SDF antialiasing from 1.05 to 1.14 pixels to better match the

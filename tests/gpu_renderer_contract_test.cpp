@@ -29,6 +29,7 @@ struct Recorder {
   int fail_upload_at{-1};
   int upload_count{};
   std::vector<std::wstring> pixel_sources;
+  std::vector<PIXEL_RGBA> output_pixels;
 };
 
 Recorder* active_recorder{};
@@ -49,10 +50,14 @@ struct MorphConstantsProbe {
 };
 MorphConstantsProbe captured_constants{};
 
-void set_image(const PIXEL_RGBA*, int width, int height) {
+void set_image(const PIXEL_RGBA* buffer, int width, int height) {
   active_recorder->calls.push_back(L"object");
   active_recorder->width = width;
   active_recorder->height = height;
+  if (buffer != nullptr) {
+    active_recorder->output_pixels.assign(
+        buffer, buffer + static_cast<std::size_t>(width) * height);
+  }
 }
 
 bool resource_size(LPCWSTR resource, int* width, int* height) {
@@ -164,7 +169,7 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(cold.pixel_sources[0] == first.before.final_sdf);
   MB_CHECK(cold.pixel_sources[1] == first.after.final_sdf);
   MB_CHECK_NEAR(captured_constants.progress, 1.25F, 0.0001F);
-  MB_CHECK_NEAR(captured_constants.feather_width, 1.14F, 0.0001F);
+  MB_CHECK_NEAR(captured_constants.feather_width, 1.115F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.extrapolation_limit, 32.0F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[0], 0.5F, 0.0001F);
   MB_CHECK_NEAR(captured_constants.before_row0[1], 0.0F, 0.0001F);
@@ -183,6 +188,38 @@ void run_gpu_renderer_contract_tests() {
   MB_CHECK(warm.size_query_count == 0);
   MB_CHECK(warm.calls.front() == L"object");
   MB_CHECK(warm.calls.back() == L"pixel:object");
+
+  Recorder exact_before;
+  active_recorder = &exact_before;
+  auto before_endpoint = request(video, images);
+  before_endpoint.progress = 0.0F;
+  const auto before_result = renderer.render(before_endpoint);
+  MB_CHECK(before_result.error == RenderError::None);
+  MB_CHECK(!before_result.rebuilt);
+  MB_CHECK(exact_before.calls.size() == 1);
+  MB_CHECK(exact_before.upload_count == 0);
+  MB_CHECK(exact_before.pixel_sources.empty());
+  MB_CHECK(exact_before.width == 2);
+  MB_CHECK(exact_before.height == 2);
+  MB_CHECK(exact_before.output_pixels.size() == 4);
+  MB_CHECK(exact_before.output_pixels[0].a == 255);
+  MB_CHECK(exact_before.output_pixels[3].a == 255);
+
+  Recorder exact_after;
+  active_recorder = &exact_after;
+  auto after_endpoint = request(video, images);
+  after_endpoint.progress = 1.0F;
+  const auto after_result = renderer.render(after_endpoint);
+  MB_CHECK(after_result.error == RenderError::None);
+  MB_CHECK(!after_result.rebuilt);
+  MB_CHECK(exact_after.calls.size() == 1);
+  MB_CHECK(exact_after.upload_count == 0);
+  MB_CHECK(exact_after.pixel_sources.empty());
+  MB_CHECK(exact_after.width == 2);
+  MB_CHECK(exact_after.height == 2);
+  MB_CHECK(exact_after.output_pixels.size() == 4);
+  MB_CHECK(exact_after.output_pixels[0].a == 128);
+  MB_CHECK(exact_after.output_pixels[3].a == 128);
 
   Recorder cleared;
   active_recorder = &cleared;

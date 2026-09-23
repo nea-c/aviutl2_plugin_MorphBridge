@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <cwchar>
 #include <limits>
 #include <string>
@@ -46,6 +47,15 @@ std::vector<std::byte> place_image(
     }
   }
   return output;
+}
+
+void output_exact_endpoint(
+    FILTER_PROC_VIDEO& video,
+    const RgbaImage& image) {
+  std::vector<PIXEL_RGBA> output(
+      static_cast<std::size_t>(image.width) * static_cast<std::size_t>(image.height));
+  std::memcpy(output.data(), image.pixels.data(), image.pixels.size());
+  video.set_image_data(output.data(), image.width, image.height);
 }
 
 struct alignas(16) SeedConstants {
@@ -203,7 +213,6 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   }
 
   auto& video = *request.video;
-  video.set_image_data(nullptr, request.layout.width, request.layout.height);
   const auto resources = build_gpu_resource_plan(request.effect_id, request.signature);
   auto before_plan = build_sdf_plan(
       request.layout.width, request.layout.height, resources.before.prefix);
@@ -227,6 +236,15 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
   if (before_pixels.empty() || after_pixels.empty()) {
     return {RenderError::InvalidRequest, false};
   }
+  if (request.progress == 0.0F || request.progress == 1.0F) {
+    output_exact_endpoint(
+        video, request.progress == 0.0F
+                   ? request.endpoints->before
+                   : request.endpoints->after);
+    return {RenderError::None, false};
+  }
+
+  video.set_image_data(nullptr, request.layout.width, request.layout.height);
   const int pitch = request.layout.width * 4;
   if (!video.set_image_resource_data(
           before_plan->upload.c_str(), before_pixels.data(),
@@ -252,7 +270,7 @@ RenderResult GpuRenderer::render(const GpuRenderRequest& request) {
       request.color,
       request.progress,
       maximum_distance,
-      1.14F,
+      1.115F,
       std::clamp(request.color[3], 0.0F, 1.0F),
       request.extrapolation_limit,
       {},
