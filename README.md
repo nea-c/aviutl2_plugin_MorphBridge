@@ -1,95 +1,27 @@
 # MorphBridge
 
-MorphBridge is an AviUtl2 2.1.8+ media-object plug-in for morphing the
-silhouettes of two adjacent objects with a signed distance field (SDF).
-It is Windows x64-only and distributed as one `MorphBridge.aux2` file.
+前後に置いた2つのオブジェクトのシルエットをモーフィングするメディアオブジェクトを追加するAviUtl2用プラグイン
 
-## Placement
+![sample](sample.webp)
 
-Place all three objects on the same layer without another object between them:
+## 使い方
+
+同レイヤーに、間を空けず次の順番で配置します。
 
 ```text
-A object -> MorphBridge -> B object
+前オブジェクト → MorphBridge → 後オブジェクト
 ```
 
-MorphBridge captures the final frame of A and the first frame of B with their
-effects applied. `進捗` is an ordinary AviUtl2 track: leave its first value
-at 0, set the second value to 100, and select linear or another standard movement
-mode. Easing overshoot is extrapolated instead of clamped. There is intentionally
-no automatic-progress switch.
+`進捗`を通常の移動設定で0から100へ動かします。
 
-## Controls
+- `色`：出力するシルエットの色
+- `前後オブジェクト補正`：位置、拡大率、回転、縦横比の調整
 
-- `進捗`: silhouette interpolation, including values outside 0–100.
-- `色`: solid output color.
-- `前オブジェクト補正` / `後オブジェクト補正`: image-centered X, Y,
-  scale, rotation, and aspect tracks. The previous-object correction is weighted
-  by Progress; the next-object correction is weighted by one minus Progress.
-  These tracks affect SDF sampling only and extrapolate with Progress. Scale is
-  an absolute percentage where 100 means no correction.
+## 最新 / Latest
 
-The SDF is always generated at 100% working resolution, with its silhouette
-boundary fixed at 50% captured alpha. Alpha values around that boundary are
-used only to estimate the subpixel position of the silhouette boundary. They do
-not make the output silhouette partially transparent.
+**r1**
 
-The endpoint position, center, rotation, scale/aspect, and opacity are read at
-the endpoint frames automatically. Scale and aspect are applied independently
-to the A/B SDFs before silhouette interpolation. Position, center, rotation,
-and opacity remain output-object transforms; rotation uses the shortest path.
+## 変更履歴 / Change log
 
-## Cache behavior
-
-`UPDATE_OBJECT` marks the project generation as changed. On the next render,
-MorphBridge compares the complete A/B aliases, endpoint frames, scene size,
-fixed SDF resolution, cache format, and edit generation. It
-captures again when either the signature or generation changes. Rapid edits are
-coalesced and stale asynchronous results are discarded. CPU endpoint images are
-retained, while transient GPU SDF resources are reconstructed before each draw
-because AviUtl2 does not preserve those image resources between render calls.
-
-The SDF canvas expands automatically to contain the currently weighted A/B
-corrections, including translation, scale, rotation, and aspect changes. When
-inverse correction sampling reaches beyond an endpoint SDF texture, its outside
-distance is extended continuously from the nearest texture edge.
-
-Extrapolated progress uses an adaptive transparent SDF margin. Beyond 0% or
-100%, the contour remains limited to a size-dependent neighborhood around the
-corresponding endpoint, preventing distant canvas-edge fragments while keeping
-typical elastic overshoot visible.
-
-## Build
-
-Use a Visual Studio x64 developer environment with CMake 3.28+, Ninja, the
-Windows SDK `fxc.exe`, and the vendored AviUtl2 SDK headers.
-
-```powershell
-cmake --preset dev
-cmake --build --preset dev
-ctest --preset dev --output-on-failure
-```
-
-For a release package:
-
-```powershell
-cmake --preset release
-cmake --build --preset release
-ctest --preset release --output-on-failure
-cmake --build --preset release --target package
-```
-
-## v1 limitations
-
-- Output is a single solid-color silhouette; source RGB, texture, and partial
-  alpha are not retained. The final SDF edge is anti-aliased in screen space.
-- A and B must be image-producing objects on the same layer around MorphBridge.
-- Endpoint capture is not started during file output. Prepare the cache once in
-  the editor before final output.
-- Added effects outside the endpoint object, such as a separate Group Control,
-  are outside the v1 capture contract.
-- Real AviUtl2/GPU smoke-test results are tracked in
-  `docs/manual-test-checklist.md`; an unchecked item is not a claimed pass.
-
-## License
-
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
+- r1
+  - 初版
