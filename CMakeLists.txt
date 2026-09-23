@@ -80,7 +80,18 @@ target_include_directories(MorphBridge PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_include_directories(morph_bridge_core PRIVATE "${MORPH_BRIDGE_GENERATED_DIR}")
 target_link_libraries(morph_bridge_core PUBLIC aviutl2_sdk)
 
-set(MORPH_BRIDGE_PACKAGE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/package")
+set(MORPH_BRIDGE_RELEASE "r1")
+set(MORPH_BRIDGE_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/package")
+set(MORPH_BRIDGE_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/package")
+file(MAKE_DIRECTORY "${MORPH_BRIDGE_PACKAGE_DIR}")
+configure_file(
+  "${MORPH_BRIDGE_PACKAGE_SOURCE_DIR}/package.ini.in"
+  "${MORPH_BRIDGE_PACKAGE_DIR}/package.ini"
+  @ONLY)
+configure_file(
+  "${MORPH_BRIDGE_PACKAGE_SOURCE_DIR}/package.txt.in"
+  "${MORPH_BRIDGE_PACKAGE_DIR}/package.txt"
+  @ONLY)
 set(MORPH_BRIDGE_STAGED_DLL
     "${MORPH_BRIDGE_PACKAGE_DIR}/Plugin/MorphBridge/MorphBridge.aux2")
 add_custom_command(
@@ -94,7 +105,7 @@ add_custom_command(
 add_custom_target(stage_package ALL DEPENDS "${MORPH_BRIDGE_STAGED_DLL}")
 
 set(MORPH_BRIDGE_PACKAGE_ZIP
-    "${CMAKE_CURRENT_SOURCE_DIR}/MorphBridge-v${PROJECT_VERSION}.au2pkg.zip")
+    "${CMAKE_CURRENT_SOURCE_DIR}/MorphBridge-${MORPH_BRIDGE_RELEASE}.au2pkg.zip")
 add_custom_target(
   package
   COMMAND "${CMAKE_COMMAND}" -E rm -f "${MORPH_BRIDGE_PACKAGE_ZIP}"
@@ -127,5 +138,6 @@ if(BUILD_TESTING)
   add_test(
     NAME package_layout
     COMMAND "${CMAKE_COMMAND}" -DSTAGE=${MORPH_BRIDGE_PACKAGE_DIR}
+            -DRELEASE=${MORPH_BRIDGE_RELEASE}
             -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/VerifyPackage.cmake")
 endif()

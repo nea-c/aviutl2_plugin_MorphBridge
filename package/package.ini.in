@@ -1,0 +1,10 @@
+[package]
+id=MorphBridge
+name=MorphBridge
+version=@MORPH_BRIDGE_RELEASE@
+information=MorphBridge @MORPH_BRIDGE_RELEASE@ (AviUtl2 2.1.8+, Windows x64)
+file=MorphBridge-@MORPH_BRIDGE_RELEASE@.au2pkg.zip
+uninstallSubFolderFile=1
+
+[files]
+0=Plugin\MorphBridge\MorphBridge.aux2
