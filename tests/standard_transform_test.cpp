@@ -92,6 +92,14 @@ void run_standard_transform_tests() {
   after_correction.x = 20.0;
   const auto pair = make_sampling_transforms(
       correction, after_correction, 1.25, 100.0F, 50.0F, 80.0F, 40.0F);
-  MB_CHECK_NEAR(pair.first.tx, -2.5F, 0.0001F);
-  MB_CHECK_NEAR(pair.second.tx, 25.0F, 0.0001F);
+  MB_CHECK_NEAR(pair.first.tx, 12.5F, 0.0001F);
+  MB_CHECK_NEAR(pair.second.tx, -5.0F, 0.0001F);
+  const auto transition = make_sampling_transforms(
+      correction, after_correction, 0.25, 100.0F, 50.0F, 80.0F, 40.0F);
+  MB_CHECK_NEAR(transition.first.tx, 2.5F, 0.0001F);
+  MB_CHECK_NEAR(transition.first.ty, -5.0F, 0.0001F);
+  MB_CHECK_NEAR(transition.first.rotation, 7.5F, 0.0001F);
+  MB_CHECK_NEAR(transition.first.sx, 1.28125F, 0.0001F);
+  MB_CHECK_NEAR(transition.first.sy, 1.21875F, 0.0001F);
+  MB_CHECK_NEAR(transition.second.tx, 15.0F, 0.0001F);
 }

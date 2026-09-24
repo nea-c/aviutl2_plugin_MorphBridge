@@ -40,7 +40,10 @@ Record the environment before checking any item.
 - [ ] A/B position, center, and opacity interpolate from endpoint values.
 - [ ] Rotation takes the shortest path across 360/0 degrees.
 - [ ] Scale stays positive through the midpoint.
-- [ ] A corrections fade out and B corrections fade in with Progress.
+- [ ] A correction is zero at Progress 0 and grows toward 100; B correction
+      shrinks toward zero at Progress 100. Both affect the SDF during the morph.
+- [ ] Progress 0 and 100 match the neighboring objects' transforms without
+      correction, including scale and aspect ratio.
 
 ## Output
 

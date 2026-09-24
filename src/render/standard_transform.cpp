@@ -116,9 +116,9 @@ std::pair<SamplingTransform, SamplingTransform> make_sampling_transforms(
     const float after_center_y) {
   return {
       make_sampling_transform(
-          before, 1.0 - progress, before_center_x, before_center_y),
+          before, progress, before_center_x, before_center_y),
       make_sampling_transform(
-          after, progress, after_center_x, after_center_y)};
+          after, 1.0 - progress, after_center_x, after_center_y)};
 }
 
 }  // namespace morph_bridge
